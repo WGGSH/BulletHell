@@ -11,12 +11,17 @@ public class Enemy : MonoBehaviour {
 
   [SerializeField]
   public List<Bullet> bulletList;
+  [SerializeField]
+  private int maxBullet;
 
   private Bullet bullet;
   private Vector3 pos;
 
   private delegate void DanmakuFunc ();
   private DanmakuFunc[] funcTables;
+  private Transform transformComponent;
+
+  private int findLastIndex;
 
   // Use this for initialization
   void Start () {
@@ -26,7 +31,15 @@ public class Enemy : MonoBehaviour {
     this.funcTables[1] = this.Func01;
     this.funcTables[2] = this.Func02;
 
+    this.bulletList.Clear ();
+    for (int i = 0; i < this.maxBullet; i++) {
+      this.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as Bullet;
+      this.bulletList.Add (this.bullet);
+    }
+
     this.currentFuncIndex = 0;
+
+    this.transformComponent = this.GetComponent<Transform> ();
   }
 
   // Update is called once per frame
@@ -51,36 +64,83 @@ public class Enemy : MonoBehaviour {
     this.bulletList.Clear ();
   }
 
+  private Bullet FindBullet () {
+    int firstIndex = this.findLastIndex;
+    int index = this.findLastIndex;
+    while (true) {
+      if (this.bulletList[index].active == false) {
+        return this.bulletList[index];
+      }
+      index++;
+      if (index == this.maxBullet) {
+        index = 0;
+      }
+      if (index == firstIndex) {
+        break;
+      }
+    }
+    // for (int i = this.findLastIndex; i < this.maxBullet; i++) {
+    //   if (this.bulletList[i].active == false) {
+    //     return this.bulletList[i];
+    //   }
+    // }
+    return null;
+  }
+
   private void Func00 () {
-    if (this.frameCount % 3 == 0) {
+    if (this.frameCount % 2 == 0) {
+      this.findLastIndex = 0;
       // 弾の生成
       for (int x = 0; x < 6; x++) {
         for (int y = 0; y < 3; y++) {
-          this.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as Bullet;
-          this.bullet.speed = 0.05f;
-          this.bullet.SetAngle (
+          Bullet targetBullet = this.FindBullet ();
+          if (targetBullet == null) continue;
+          // this.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as Bullet;
+          targetBullet.transformComponent.position = this.transformComponent.position;
+          // targetBullet.active = true;
+          // targetBullet.gameObject.SetActive (true);
+          targetBullet.Activate ();
+
+          // targetBullet.enabled = true;
+          targetBullet.speed = 0.05f;
+          targetBullet.SetAngle (
             6.28f / 6 * (x + y / 7.0f) + this.frameCount * this.frameCount / 10000.0f,
             Mathf.Sin (this.frameCount / 100f * y) / 12.0f
           );
           // this.bullet.SetColor (Color.HSVToRGB ((this.frameCount / 100) % 1.0f, 1.0f, 1));
-          this.bullet.SetColor (Color.HSVToRGB (
-            (this.frameCount / 100.0f + 0 * 0.04f) % 1.0f,
+          targetBullet.SetColor (Color.HSVToRGB (
+            (this.frameCount / 100.0f + x * 0.08f) % 1.0f,
             0.5f,
             0.6f));
-          this.bulletList.Add (this.bullet);
+          // this.bulletList.Add (this.bullet);
         }
       }
     }
 
     int count = this.bulletList.Count;
-    for (int i = count - 1; i >= 0; i--) {
-      this.bulletList[i].Move ();
-      this.pos = this.bulletList[i].transform.position;
-      if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
-        Destroy (this.bulletList[i].gameObject);
-        this.bulletList.Remove (this.bulletList[i]);
+    for (int i = 0; i < this.maxBullet; i++) {
+      if (this.bulletList[i].active == true) {
+        Bullet target = this.bulletList[i];
+        target.Move ();
+        this.pos = target.transformComponent.position;
+        if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
+          // target.active = false;
+          // target.gameObject.SetActive (false);
+          this.bulletList[i].Diactivate ();
+
+          // Destroy (this.bulletList[i].gameObject);
+          // this.bulletList.Remove (this.bulletList[i]);
+        }
       }
     }
+    // for (int i = count - 1; i >= 0; i--) {
+    //   this.bulletList[i].Move ();
+    //   this.pos = this.bulletList[i].transform.position;
+    //   if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
+    //     Destroy (this.bulletList[i].gameObject);
+    //     this.bulletList.Remove (this.bulletList[i]);
+    //   }
+    // }
   }
 
   private void Func01 () {

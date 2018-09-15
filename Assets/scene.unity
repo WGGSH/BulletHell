@@ -214,6 +214,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114981828723547150, guid: 135d38e3af2262f4993cd2b402d78efc,
+        type: 2}
+      propertyPath: maxBullet
+      value: 6000
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 135d38e3af2262f4993cd2b402d78efc, type: 2}
   m_IsPrefabParent: 0
@@ -572,6 +577,12 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1579391260}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1676518835 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114981828723547150, guid: 135d38e3af2262f4993cd2b402d78efc,
+    type: 2}
+  m_PrefabInternal: {fileID: 978504699}
+  m_Script: {fileID: 11500000, guid: 913f12ba0f8bf4c4c9a1d1942d0c5f7c, type: 3}
 --- !u!1 &1768405653
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,6 +756,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66afbffab1d2b78408175c756ed9bbb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemy: {fileID: 1676518835}
 --- !u!114 &2122046766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -757,7 +769,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0, g: 0.85045415, b: 0.8897059, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:

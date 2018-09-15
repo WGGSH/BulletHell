@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FPS : MonoBehaviour {
+public class UI : MonoBehaviour {
+  [SerializeField]
+  private Enemy enemy;
   private int count;
   private Text text;
   // Use this for initialization
@@ -17,7 +19,9 @@ public class FPS : MonoBehaviour {
   void Update () {
     this.count++;
     if (this.count % 60 == 0) {
-      this.text.text = "FPS: " + 1.0f / Time.deltaTime;
+      this.text.text =
+        "FPS: " + 1.0f / Time.deltaTime + "\n" +
+        "Bullet: " + this.enemy.bulletList.Count;
     }
   }
 }

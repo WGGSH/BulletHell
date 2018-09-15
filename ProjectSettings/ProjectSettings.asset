@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 14
-  productGUID: 0368294583e676e44bf1fbe07150d857
+  productGUID: 0ea32c679d6f6b44bbd333af336782fa
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   defaultScreenOrientation: 4
@@ -634,8 +634,8 @@ PlayerSettings:
     UNet: 1
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
-  cloudProjectId: 48d1ac74-fb5d-4e3f-b54b-55cd84f81f30
-  projectName: BulletHell
+  cloudProjectId: 6d4e08cf-4fdf-4a55-9bef-822c4df9a8f8
+  projectName: BulletHell (1)
   organizationId: wgg_sh
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0

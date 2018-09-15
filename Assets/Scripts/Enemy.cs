@@ -10,7 +10,7 @@ public class Enemy : MonoBehaviour {
   private int currentFuncIndex;
 
   [SerializeField]
-  private List<Bullet> bulletList;
+  public List<Bullet> bulletList;
 
   private Bullet bullet;
   private Vector3 pos;
@@ -52,18 +52,19 @@ public class Enemy : MonoBehaviour {
   }
 
   private void Func00 () {
-    if (this.frameCount % 1 == 0) {
+    if (this.frameCount % 3 == 0) {
       // 弾の生成
       for (int x = 0; x < 6; x++) {
         for (int y = 0; y < 3; y++) {
-          this.bullet = Instantiate (this.bulletPrefab[6], this.transform.position, Quaternion.identity) as Bullet;
+          this.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as Bullet;
+          this.bullet.speed = 0.05f;
           this.bullet.SetAngle (
             6.28f / 6 * (x + y / 7.0f) + this.frameCount * this.frameCount / 10000.0f,
             Mathf.Sin (this.frameCount / 100f * y) / 12.0f
           );
           // this.bullet.SetColor (Color.HSVToRGB ((this.frameCount / 100) % 1.0f, 1.0f, 1));
           this.bullet.SetColor (Color.HSVToRGB (
-            (this.frameCount / 100.0f + x * 0.04f) % 1.0f,
+            (this.frameCount / 100.0f + 0 * 0.04f) % 1.0f,
             0.5f,
             0.6f));
           this.bulletList.Add (this.bullet);
@@ -91,7 +92,7 @@ public class Enemy : MonoBehaviour {
       float col = Random.Range (0, 1.0f);
       for (int y = 0; y < 64; y++) {
         for (int x = 0; x < 32; x++) {
-          this.bullet = Instantiate (this.bulletPrefab[6], this.transform.position, Quaternion.identity);
+          this.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity);
           this.bullet.SetAngle (6.28f / 64 * x, 6.28f / 64 * y);
           this.bullet.velocity = Quaternion.Euler (angle1, angle2, angle3) * this.bullet.velocity;
           this.bullet.SetColor (Color.HSVToRGB (col, 0.5f, 0.6f));
@@ -118,7 +119,7 @@ public class Enemy : MonoBehaviour {
       float col = 0.5f + 0.1f * Mathf.Sin (this.frameCount / 10.0f);
       for (int y = 0; y < 3; y++) {
         for (int x = 0; x < 6; x++) {
-          this.bullet = Instantiate (this.bulletPrefab[6], this.transform.position, Quaternion.identity);
+          this.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity);
           this.bullet.SetAngle (6.28f / 6 * x + Mathf.Sin (this.frameCount / 16.0f) * 6.28f / 12, 6.28f / 16 * 5);
           this.bullet.SetSpeed (0.07f - 0.015f * y);
           this.bullet.accel.Set (0, -0.0003f, 0);

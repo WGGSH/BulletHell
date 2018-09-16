@@ -12,7 +12,7 @@ public class Enemy : MonoBehaviour {
   [SerializeField]
   public List<Bullet> bulletList;
   [SerializeField]
-  private int maxBullet;
+  public int maxBullet;
 
   private Bullet bullet;
   private Vector3 pos;
@@ -88,7 +88,7 @@ public class Enemy : MonoBehaviour {
   }
 
   private void Func00 () {
-    if (this.frameCount % 2 == 0) {
+    if (this.frameCount % 1 == 0) {
       this.findLastIndex = 0;
       // 弾の生成
       for (int x = 0; x < 6; x++) {
@@ -122,6 +122,7 @@ public class Enemy : MonoBehaviour {
       if (this.bulletList[i].active == true) {
         Bullet target = this.bulletList[i];
         target.Move ();
+        target.Draw ();
         this.pos = target.transformComponent.position;
         if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
           // target.active = false;
@@ -133,14 +134,6 @@ public class Enemy : MonoBehaviour {
         }
       }
     }
-    // for (int i = count - 1; i >= 0; i--) {
-    //   this.bulletList[i].Move ();
-    //   this.pos = this.bulletList[i].transform.position;
-    //   if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
-    //     Destroy (this.bulletList[i].gameObject);
-    //     this.bulletList.Remove (this.bulletList[i]);
-    //   }
-    // }
   }
 
   private void Func01 () {

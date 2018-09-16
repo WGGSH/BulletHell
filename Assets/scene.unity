@@ -113,6 +113,48 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &266655987
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4050894803186996, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+      propertyPath: m_RootOrder
+      value: 6
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: d695b73af0169bb48a9af45c80907a56, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &785435745
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,7 +259,7 @@ Prefab:
     - target: {fileID: 114981828723547150, guid: 135d38e3af2262f4993cd2b402d78efc,
         type: 2}
       propertyPath: maxBullet
-      value: 6000
+      value: 3000
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 135d38e3af2262f4993cd2b402d78efc, type: 2}
@@ -611,6 +653,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotateSpeed: 0.3
+  enemy: {fileID: 1676518835}
 --- !u!4 &1768405655
 Transform:
   m_ObjectHideFlags: 0

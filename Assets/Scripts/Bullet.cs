@@ -11,6 +11,7 @@ public class Bullet : MonoBehaviour {
   private Renderer rendererComponent;
   private Color color;
   public Transform transformComponent;
+  public Transform cameraTransformComponent;
 
   [SerializeField]
   public float speed;
@@ -21,6 +22,8 @@ public class Bullet : MonoBehaviour {
   public bool active;
   public Vector3 positionCache;
 
+  private Mesh mesh;
+
   // Use this for initialization
 
   void Awake () {
@@ -30,12 +33,41 @@ public class Bullet : MonoBehaviour {
     this.transformComponent = this.GetComponent<Transform> ();
     // this.gameObject.SetActive (false);
     this.positionCache = this.transformComponent.position;
+    this.cameraTransformComponent = Camera.main.transform;
+    this.rendererComponent.enabled = false;
+
+    // 動的Mesh生成
+    this.mesh = new Mesh ();
+    float size = 0.01f;
+    this.mesh.vertices = new Vector3[] {
+      new Vector3 (-size, -size, 0),
+      new Vector3 (size, -size, 0),
+      new Vector3 (size, size, 0),
+      new Vector3 (-size, size, 0),
+    };
+    this.mesh.uv = new Vector2[] {
+      new Vector2 (0, 0),
+      new Vector2 (1f, 0),
+      new Vector2 (1f, 1f),
+      new Vector2 (0, 1f),
+    };
+    this.mesh.triangles = new int[] {
+      0,
+      1,
+      2,
+      0,
+      2,
+      3,
+    };
+    this.mesh.RecalculateNormals ();
+    this.mesh.RecalculateBounds ();
   }
+
   void Start () { }
 
   // Update is called once per frame
   void Update () {
-    this.transform.LookAt (Camera.main.transform.position);
+    // this.transform.LookAt (Camera.main.transform.position);
   }
 
   public void SetAngle (float _angle1, float _angle2) {
@@ -53,8 +85,12 @@ public class Bullet : MonoBehaviour {
     this.velocity *= speed;
   }
 
-  public void Draw(){
+  public void Draw () {
     // Graphics.DrawMesh()
+    // this.transform.LookAt (this.cameraTransformComponent);
+    // Graphics.DrawMesh (this.mesh, this.transformComponent.position,
+    //   Quaternion.identity, this.material, 0);
+
   }
 
   public void Move () {
@@ -72,6 +108,7 @@ public class Bullet : MonoBehaviour {
   public void Activate () {
     this.active = true;
     this.rendererComponent.enabled = true;
+    this.transformComponent.LookAt (this.cameraTransformComponent.position);
   }
 
   public void Diactivate () {

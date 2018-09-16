@@ -5,6 +5,8 @@ using UnityEngine;
 public class CameraRotate : MonoBehaviour {
   [SerializeField]
   private float rotateSpeed;
+  [SerializeField]
+  private Enemy enemy;
   private float angle1;
   private float angle2;
 
@@ -31,14 +33,26 @@ public class CameraRotate : MonoBehaviour {
       this.angle2 += (currentScreenPoint.x - this.screenPoint.x) * this.rotateSpeed;
 
       this.screenPoint = currentScreenPoint;
+
+      if (this.angle1 > 180) {
+        this.angle1 = 180;
+      }
+      if (this.angle1 < -180) {
+        this.angle1 = -180;
+      }
+      this.transform.rotation = Quaternion.Euler (this.angle1, this.angle2, 0);
+
+      // 全ての弾の向きをカメラに合わせる
+      int count = this.enemy.bulletList.Count;
+      for (int i = 0; i < count; i++) {
+        Bullet targetBullet = this.enemy.bulletList[i];
+        if (targetBullet.active == false) {
+          continue;
+        }
+        targetBullet.transformComponent.LookAt (targetBullet.cameraTransformComponent.position);
+      }
+
     }
 
-    if (this.angle1 > 180) {
-      this.angle1 = 180;
-    }
-    if (this.angle1 < -180) {
-      this.angle1 = -180;
-    }
-    this.transform.rotation = Quaternion.Euler (this.angle1, this.angle2, 0);
   }
 }

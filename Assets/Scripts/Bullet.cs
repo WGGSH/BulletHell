@@ -95,10 +95,6 @@ public class Bullet : MonoBehaviour {
 
   public void Move () {
     this.transformComponent.position += this.velocity;
-    // this.transformComponent.position.Set (
-    //   this.transformComponent.position.x + this.velocity.x,
-    //   this.transformComponent.position.y + this.velocity.y,
-    //   this.transformComponent.position.z + this.velocity.z);
   }
 
   public void SetColor (Color _color) {

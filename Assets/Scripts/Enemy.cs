@@ -66,74 +66,72 @@ public class Enemy : MonoBehaviour {
 
   private Bullet FindBullet () {
     int firstIndex = this.findLastIndex;
-    int index = this.findLastIndex;
+    int index = firstIndex;
+    Bullet targetBullet;
     while (true) {
-      if (this.bulletList[index].active == false) {
-        return this.bulletList[index];
+      targetBullet = this.bulletList[index++];
+      // return targetBullet;
+      if (targetBullet.active == false) {
+        // Debug.Log (index - firstIndex);
+        this.findLastIndex = index;
+        if (this.findLastIndex == this.maxBullet) {
+          this.findLastIndex = 0;
+        }
+        return targetBullet;
       }
-      index++;
       if (index == this.maxBullet) {
         index = 0;
       }
+      // ループを1周した場合,生成可能な弾のスペースが無いため終了
       if (index == firstIndex) {
         break;
       }
     }
-    // for (int i = this.findLastIndex; i < this.maxBullet; i++) {
-    //   if (this.bulletList[i].active == false) {
-    //     return this.bulletList[i];
-    //   }
-    // }
     return null;
   }
 
   private void Func00 () {
-    if (this.frameCount % 1 == 0) {
-      this.findLastIndex = 0;
+    if (this.frameCount % 2 == 0) {
+      // this.findLastIndex = 0;
       // 弾の生成
       for (int x = 0; x < 6; x++) {
         for (int y = 0; y < 3; y++) {
           Bullet targetBullet = this.FindBullet ();
           if (targetBullet == null) continue;
-          // this.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as Bullet;
           targetBullet.transformComponent.position = this.transformComponent.position;
           // targetBullet.active = true;
           // targetBullet.gameObject.SetActive (true);
           targetBullet.Activate ();
 
-          // targetBullet.enabled = true;
           targetBullet.speed = 0.05f;
           targetBullet.SetAngle (
             6.28f / 6 * (x + y / 7.0f) + this.frameCount * this.frameCount / 10000.0f,
             Mathf.Sin (this.frameCount / 100f * y) / 12.0f
           );
-          // this.bullet.SetColor (Color.HSVToRGB ((this.frameCount / 100) % 1.0f, 1.0f, 1));
           targetBullet.SetColor (Color.HSVToRGB (
             (this.frameCount / 100.0f + x * 0.08f) % 1.0f,
             0.5f,
             0.6f));
-          // this.bulletList.Add (this.bullet);
         }
       }
     }
 
-    int count = this.bulletList.Count;
+    // 弾の移動処理
+    // ここが一番重い
+    Bullet target;
     for (int i = 0; i < this.maxBullet; i++) {
-      if (this.bulletList[i].active == true) {
-        Bullet target = this.bulletList[i];
+      target = this.bulletList[i];
+      if (target.active) {
         target.Move ();
-        target.Draw ();
         this.pos = target.transformComponent.position;
         if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
           // target.active = false;
           // target.gameObject.SetActive (false);
-          this.bulletList[i].Diactivate ();
-
-          // Destroy (this.bulletList[i].gameObject);
-          // this.bulletList.Remove (this.bulletList[i]);
+          target.Diactivate ();
         }
       }
     }
+
   }
 
   private void Func01 () {

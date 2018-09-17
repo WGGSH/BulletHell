@@ -43,13 +43,13 @@ public class CameraRotate : MonoBehaviour {
       this.transform.rotation = Quaternion.Euler (this.angle1, this.angle2, 0);
 
       // 全ての弾の向きをカメラに合わせる
-      int count = this.enemy.bulletList.Count;
+      int count = this.enemy.BulletList.Count;
       for (int i = 0; i < count; i++) {
-        Bullet targetBullet = this.enemy.bulletList[i];
+        Bullet targetBullet = this.enemy.BulletList[i];
         if (targetBullet.active == false) {
           continue;
         }
-        targetBullet.transformComponent.LookAt (targetBullet.cameraTransformComponent.position);
+        targetBullet.TransformCache.LookAt (targetBullet.CameraTransformCache.position);
       }
 
     }

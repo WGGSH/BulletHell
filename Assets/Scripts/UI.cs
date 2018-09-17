@@ -24,9 +24,9 @@ public class UI : MonoBehaviour {
       float fps = 1.0f / this.time * 60;
       this.time = 0;
       int num = 0;
-      int max = this.enemy.bulletList.Count;
+      int max = this.enemy.BulletList.Count;
       for (int i = 0; i < max; i++) {
-        if (this.enemy.bulletList[i].active == true) {
+        if (this.enemy.BulletList[i].active == true) {
           num++;
         }
       }

@@ -4,28 +4,37 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour {
   [SerializeField]
-  private Bullet[] bulletPrefab;
+  private Bullet[] bulletPrefab; // 使用する弾のPrefab
 
-  private int frameCount;
-  private int currentFuncIndex;
+  private int frameCount; // フレーム数
+  private int currentFuncIndex; // 実行中の弾幕番号
 
   [SerializeField]
-  public List<Bullet> bulletList;
+  private List<Bullet> bulletList;
   [SerializeField]
-  public int maxBullet;
+  private int maxBullet;
 
+  // キャッシュデータ
   private Bullet bullet;
   private Vector3 pos;
+  private int findLastIndex;
 
+  // 弾幕リスト
   private delegate void DanmakuFunc ();
   private DanmakuFunc[] funcTables;
   private Transform transformComponent;
 
-  private int findLastIndex;
+  public List<Bullet> BulletList {
+    get { return this.bulletList; }
+  }
+
+  // public int MaxBullet {
+  //   get { return this.maxBullet; }
+  // }
 
   // Use this for initialization
   void Start () {
-    // this.bulletPrefab = (Bullet) Resources.Load ("Resources/Prefabs/Bullet");
+    // 弾幕の登録
     this.funcTables = new DanmakuFunc[3];
     this.funcTables[0] = this.Func00;
     this.funcTables[1] = this.Func01;
@@ -50,29 +59,30 @@ public class Enemy : MonoBehaviour {
     this.funcTables[this.currentFuncIndex] ();
   }
 
+  // 実行する弾幕の変更
   public void ChangeFunc (int num) {
     this.currentFuncIndex = num;
     this.Restart ();
   }
 
+  // 弾幕を初期状態に戻す
   public void Restart () {
     this.frameCount = 0;
-    int size = this.bulletList.Count;
-    for (int i = size - 1; i >= 0; i--) {
-      Destroy (this.bulletList[i].gameObject);
+    this.findLastIndex = 0;
+    for (int i = 0; i < this.bulletList.Count; i++) {
+      this.bulletList[i].Diactivate ();
     }
     this.bulletList.Clear ();
   }
 
+  // 使用可能な弾を探す
   private Bullet FindBullet () {
     int firstIndex = this.findLastIndex;
     int index = firstIndex;
     Bullet targetBullet;
     while (true) {
       targetBullet = this.bulletList[index++];
-      // return targetBullet;
       if (targetBullet.active == false) {
-        // Debug.Log (index - firstIndex);
         this.findLastIndex = index;
         if (this.findLastIndex == this.maxBullet) {
           this.findLastIndex = 0;
@@ -90,28 +100,36 @@ public class Enemy : MonoBehaviour {
     return null;
   }
 
+  // 弾幕
   private void Func00 () {
     if (this.frameCount % 2 == 0) {
-      // this.findLastIndex = 0;
       // 弾の生成
       for (int x = 0; x < 6; x++) {
         for (int y = 0; y < 3; y++) {
           Bullet targetBullet = this.FindBullet ();
           if (targetBullet == null) continue;
-          targetBullet.transformComponent.position = this.transformComponent.position;
-          // targetBullet.active = true;
-          // targetBullet.gameObject.SetActive (true);
-          targetBullet.Activate ();
 
+          // ----- ここから弾幕の設定 -----
+
+          // 初期座標
+          targetBullet.TransformCache.position = this.transformComponent.position;
+
+          // 初期速度
           targetBullet.speed = 0.05f;
-          targetBullet.SetAngle (
-            6.28f / 6 * (x + y / 7.0f) + this.frameCount * this.frameCount / 10000.0f,
-            Mathf.Sin (this.frameCount / 100f * y) / 12.0f
-          );
+
+          // 初期角度
+          targetBullet.Angle1 = 6.28f / 6 * (x + y / 7.0f) + this.frameCount * this.frameCount / 10000.0f;
+          targetBullet.Angle2 = 6.28f / 3 * y + Mathf.Sin (this.frameCount / 100f * y) / 12.0f;
+
+          // 色設定
           targetBullet.SetColor (Color.HSVToRGB (
             (this.frameCount / 100.0f + x * 0.08f) % 1.0f,
             0.5f,
             0.6f));
+
+          // ----- 弾幕設定ここまで -----
+
+          targetBullet.Activate ();
         }
       }
     }
@@ -122,11 +140,9 @@ public class Enemy : MonoBehaviour {
     for (int i = 0; i < this.maxBullet; i++) {
       target = this.bulletList[i];
       if (target.active) {
-        target.Move ();
-        this.pos = target.transformComponent.position;
+        target.Move (); // 重い:要改善?
+        this.pos = target.TransformCache.position;
         if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
-          // target.active = false;
-          // target.gameObject.SetActive (false);
           target.Diactivate ();
         }
       }

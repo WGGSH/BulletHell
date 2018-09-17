@@ -10,8 +10,9 @@ public class Bullet : MonoBehaviour {
   [SerializeField]
   private Renderer rendererComponent;
   private Color color;
-  public Transform transformComponent;
-  public Transform cameraTransformComponent;
+
+  private Transform transformCache;
+  private Transform cameraTransformCache;
 
   [SerializeField]
   public float speed;
@@ -24,55 +25,77 @@ public class Bullet : MonoBehaviour {
 
   private Mesh mesh;
 
+  public Transform TransformCache {
+    get { return this.transformCache; }
+  }
+
+  public Transform CameraTransformCache {
+    get { return this.cameraTransformCache; }
+  }
+
+  public float Angle1 {
+    set { this.angle1 = value; }
+  }
+
+  public float Angle2 {
+    set { this.angle2 = value; }
+  }
+
   // Use this for initialization
 
   void Awake () {
     this.active = false;
     this.rendererComponent = this.plane.GetComponent<Renderer> ();
     this.material = this.rendererComponent.material;
-    this.transformComponent = this.GetComponent<Transform> ();
+    this.transformCache = this.GetComponent<Transform> ();
     // this.gameObject.SetActive (false);
-    this.positionCache = this.transformComponent.position;
-    this.cameraTransformComponent = Camera.main.transform;
+    this.positionCache = this.transformCache.position;
+    this.cameraTransformCache = Camera.main.transform;
     this.rendererComponent.enabled = false;
 
     // 動的Mesh生成
-    this.mesh = new Mesh ();
-    float size = 0.01f;
-    this.mesh.vertices = new Vector3[] {
-      new Vector3 (-size, -size, 0),
-      new Vector3 (size, -size, 0),
-      new Vector3 (size, size, 0),
-      new Vector3 (-size, size, 0),
-    };
-    this.mesh.uv = new Vector2[] {
-      new Vector2 (0, 0),
-      new Vector2 (1f, 0),
-      new Vector2 (1f, 1f),
-      new Vector2 (0, 1f),
-    };
-    this.mesh.triangles = new int[] {
-      0,
-      1,
-      2,
-      0,
-      2,
-      3,
-    };
-    this.mesh.RecalculateNormals ();
-    this.mesh.RecalculateBounds ();
+    // this.mesh = new Mesh ();
+    // float size = 0.01f;
+    // this.mesh.vertices = new Vector3[] {
+    //   new Vector3 (-size, -size, 0),
+    //   new Vector3 (size, -size, 0),
+    //   new Vector3 (size, size, 0),
+    //   new Vector3 (-size, size, 0),
+    // };
+    // this.mesh.uv = new Vector2[] {
+    //   new Vector2 (0, 0),
+    //   new Vector2 (1f, 0),
+    //   new Vector2 (1f, 1f),
+    //   new Vector2 (0, 1f),
+    // };
+    // this.mesh.triangles = new int[] {
+    //   0,
+    //   1,
+    //   2,
+    //   0,
+    //   2,
+    //   3,
+    // };
+    // this.mesh.RecalculateNormals ();
+    // this.mesh.RecalculateBounds ();
   }
 
   void Start () { }
 
   // Update is called once per frame
-  void Update () {
-    // this.transform.LookAt (Camera.main.transform.position);
-  }
+  void Update () { }
 
   public void SetAngle (float _angle1, float _angle2) {
     this.angle1 = _angle1;
     this.angle2 = _angle2;
+    this.velocity.Set (
+      Mathf.Cos (this.angle1) * Mathf.Cos (this.angle2) * this.speed,
+      Mathf.Sin (this.angle2) * this.speed,
+      Mathf.Sin (this.angle1) * Mathf.Cos (this.angle2) * this.speed
+    );
+  }
+
+  public void SetAngle () {
     this.velocity.Set (
       Mathf.Cos (this.angle1) * Mathf.Cos (this.angle2) * this.speed,
       Mathf.Sin (this.angle2) * this.speed,
@@ -94,7 +117,7 @@ public class Bullet : MonoBehaviour {
   }
 
   public void Move () {
-    this.transformComponent.position += this.velocity;
+    this.transformCache.position += this.velocity;
   }
 
   public void SetColor (Color _color) {
@@ -104,7 +127,8 @@ public class Bullet : MonoBehaviour {
   public void Activate () {
     this.active = true;
     this.rendererComponent.enabled = true;
-    this.transformComponent.LookAt (this.cameraTransformComponent.position);
+    this.SetAngle ();
+    this.transformCache.LookAt (this.cameraTransformCache.position);
   }
 
   public void Diactivate () {

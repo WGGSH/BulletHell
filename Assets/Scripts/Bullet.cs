@@ -23,6 +23,7 @@ public class Bullet : MonoBehaviour {
   public bool active;
   public Vector3 positionCache;
 
+
   private Mesh mesh;
 
   public Transform TransformCache {

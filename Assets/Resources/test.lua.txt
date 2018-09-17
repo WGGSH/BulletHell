@@ -1,0 +1,10 @@
+﻿local x = CS.Enemy.XCount
+local y = CS.Enemy.YCount
+local time = CS.Enemy.frameCount
+local PI = 3.14
+local bullet = CS.Enemy
+
+bullet.SetSpeed(0.05)
+bullet.SetAngle1(PI/6*x + time*time/20000)
+bullet.SetAngle2(PI*2/3*y)
+bullet.SetColor((time/100)%1)

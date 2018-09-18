@@ -1,0 +1,38 @@
+﻿#pragma kernel CSMain
+
+// 弾の構造体
+struct BulletDX
+{
+	float3 pos;
+	float3 accel;
+	float4 col;
+  int count;
+};
+
+// 前回の更新からの経過時間
+float DeltaTime;
+
+// 合計経過時間
+float TotalTime;
+
+// 弾の構造化バッファ
+RWStructuredBuffer<BulletDX> Bullets;
+
+// (8, 1, 1)のスレッドで回す
+[numthreads(8,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	// それぞれの位置情報に移動ベクトルを加算
+  if(Bullets[id.x].count==1){
+    Bullets[id.x].pos += Bullets[id.x].accel ;
+    if(Bullets[id.x].pos.x<-10 || Bullets[id.x].pos.x>10 ||
+    Bullets[id.x].pos.y<-10 || Bullets[id.x].pos.y>10 ||
+    Bullets[id.x].pos.z<-10 || Bullets[id.x].pos.z>10){
+      // フィールド外に出ると,処理を停止
+      Bullets[id.x].count = 0;
+      Bullets[id.x].pos.x=0;
+      Bullets[id.x].pos.y=0;
+      Bullets[id.x].pos.z=0;
+    }
+  }
+}

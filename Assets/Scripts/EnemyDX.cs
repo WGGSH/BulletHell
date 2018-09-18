@@ -1,5 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IO;
+using System.Runtime.InteropServices;
+// using UnityEditor;
 using UnityEngine;
+using XLua; //read write filestream
+using System.Text; //Encoding
+using System.Windows.Forms; //OpenFileDialog用に使う
 
 /// <summary>
 /// 弾の構造体
@@ -67,10 +72,19 @@ public class EnemyDX : MonoBehaviour {
   /// </summary>
   ComputeBuffer bulletsBuffer;
 
+  static private int bulletMax;
   [SerializeField]
-  private int bulletMax;
-  private BulletDX[] bulletList;
-  private int findLastIndex;
+  private int BULLETMAX;
+  static BulletDX[] bulletList;
+  static private int findLastIndex;
+
+  // Lua
+  private LuaEnv lua;
+  [SerializeField]
+  private TextAsset luaScript;
+  private string luaText;
+  [SerializeField, Multiline]
+  private string luaHeaderText;
 
   /// <summary>
   /// 破棄
@@ -84,33 +98,95 @@ public class EnemyDX : MonoBehaviour {
   /// 初期化
   /// </summary>
   void Start () {
+    bulletMax = this.BULLETMAX;
+
     bulletsMaterial = new Material (bulletsShader);
     InitializeComputeBuffer ();
 
-    this.findLastIndex = 0;
+    findLastIndex = 0;
+
+    this.lua = new LuaEnv ();
+
+  }
+
+  public void LoadScript () {
+    OpenFileDialog open_file_dialog = new OpenFileDialog ();
+
+    //InputFieldの初期値を代入しておく(こうするとダイアログがその場所から開く)
+
+    //csvファイルを開くことを指定する
+    open_file_dialog.Filter = "lua file|*.lua";
+
+    //ファイルが実在しない場合は警告を出す(true)、警告を出さない(false)
+    open_file_dialog.CheckFileExists = false;
+
+    //ダイアログを開く
+    open_file_dialog.ShowDialog ();
+
+    //取得したファイル名をstringに代入する
+    string path = open_file_dialog.FileName;
+
+    // string path = EditorUtility.OpenFilePanel ("Overwrite with png", "", "txt");
+    if (path.Length != 0) {
+      // this.luaScript = new TextAsset (path);
+      // this.luaScript = Resources.Load (path, typeof (TextAsset)) as TextAsset;
+      FileInfo fiA = new FileInfo (path);
+      StreamReader srA = new StreamReader (fiA.OpenRead (), Encoding.UTF8);
+      this.luaText = srA.ReadToEnd ();
+
+      // 読み込んだファイルが正しく実行できるかチェックする
+      try {
+        this.lua.DoString (this.luaHeaderText + this.luaText);
+      } catch (LuaException ex) {
+        MessageBox.ShowAlertBox (ex.Message, "Lua Script Error");
+        this.luaText = "";
+      }
+      this.DanmakuInitialize ();
+    }
   }
 
   /// <summary>
   /// 更新処理
   /// </summary>
-  int frameCount = 0;
+  static public int frameCount = 0;
   void Update () {
 
-    bulletsBuffer.GetData (this.bulletList);
+    bulletsBuffer.GetData (bulletList);
+    frameCount++;
 
-    this.frameCount++;
+    // 弾幕の実行
+    this.Func01 ();
+
+    bulletsBuffer.SetData (bulletList);
+    bulletsComputeShader.SetBuffer (0, "Bullets", bulletsBuffer);
+    bulletsComputeShader.Dispatch (0, bulletsBuffer.count / 8 + 1, 1, 1);
+  }
+
+  private void DanmakuInitialize () {
+    frameCount = 0;
+    bulletsBuffer.GetData (bulletList);
+    for (int i = 0; i < bulletMax; i++) {
+      bulletList[i].count = 0;
+      bulletList[i].pos = Vector3.zero;
+      bulletList[i].accel = Vector3.zero;
+    }
+    bulletsBuffer.SetData (bulletList);
+
+  }
+
+  private void Func00 () {
     float angle1, angle2;
     int XDIV = 12;
     int YDIV = 12;
     float speed = 0.15f;
     for (int y = 0; y < YDIV; y++) {
       for (int x = 0; x < XDIV; x++) {
-        int index = this.FindBullet ();
+        int index = FindBullet ();
         if (index >= 0) {
           // 弾生成処理
-          angle1 = Mathf.PI / XDIV * x + this.frameCount / 100.0f * ((x % 2) * 2 - 1);
-          angle2 = Mathf.PI * 2 / YDIV * y + Mathf.PI / 6 * Mathf.Sin (this.frameCount / 100.0f) + Mathf.PI / YDIV / 2;
-          this.bulletList[index] = new BulletDX (
+          angle1 = Mathf.PI / XDIV * x + frameCount / 100.0f * ((x % 2) * 2 - 1);
+          angle2 = Mathf.PI * 2 / YDIV * y + Mathf.PI / 6 * Mathf.Sin (frameCount / 100.0f) + Mathf.PI / YDIV / 2;
+          bulletList[index] = new BulletDX (
             new Vector3 (0, 0, 0),
             new Vector3 (
               speed * Mathf.Cos (angle1) * Mathf.Cos (angle2),
@@ -123,42 +199,52 @@ public class EnemyDX : MonoBehaviour {
 
       }
     }
-
-    // this.bulletList[this.c++] = new BulletDX (
-    //   new Vector3 (0, 0, 0),
-    //   new Vector3 (0.05f, 0, 0),
-    //   Color.HSVToRGB (Random.Range (0.0f, 1.0f), 1, 1)
-    // );
-    bulletsBuffer.SetData (this.bulletList);
-
-    bulletsComputeShader.SetBuffer (0, "Bullets", bulletsBuffer);
-    // bulletsComputeShader.SetFloat ("DeltaTime", Time.deltaTime);
-    // bulletsComputeShader.SetFloat ("TotalTime", Time.time);
-    bulletsComputeShader.Dispatch (0, bulletsBuffer.count / 8 + 1, 1, 1);
   }
 
+  private void Func01 () {
+    this.lua.DoString (this.luaHeaderText + this.luaText);
+  }
+
+  static public void BulletCreate (float px, float py, float pz, float speed, float angle1, float angle2, float h, float s, float v) {
+    int index = FindBullet ();
+    if (index == -1) {
+      return;
+    }
+    bulletList[index] = new BulletDX (
+      new Vector3 (px, py, pz),
+      new Vector3 (
+        speed * Mathf.Cos (angle1) * Mathf.Cos (angle2),
+        speed * Mathf.Sin (angle2),
+        speed * Mathf.Sin (angle1) * Mathf.Cos (angle2)
+      ),
+      Color.HSVToRGB (h, s, v)
+    );
+
+  }
+
+  // 現在表示されている弾数を取得
   public int GetBulletNum () {
     int count = 0;
-    for (int i = 0; i < this.bulletMax; i++) {
-      if (this.bulletList[i].count == 1) {
+    for (int i = 0; i < bulletMax; i++) {
+      if (bulletList[i].count == 1) {
         count++;
       }
     }
     return count;
   }
 
-  private int FindBullet () {
-    int firstIndex = this.findLastIndex;
+  private static int FindBullet () {
+    int firstIndex = findLastIndex;
     int index = firstIndex;
     while (true) {
-      if (this.bulletList[index].count == 0) {
-        this.findLastIndex = index + 1;
-        if (this.findLastIndex == this.bulletMax) {
-          this.findLastIndex = 0;
+      if (bulletList[index].count == 0) {
+        findLastIndex = index + 1;
+        if (findLastIndex == bulletMax) {
+          findLastIndex = 0;
         }
         return index;
       }
-      if (index == this.bulletMax) {
+      if (index == bulletMax) {
         index = 0;
       }
       if (index == firstIndex) {
@@ -177,14 +263,14 @@ public class EnemyDX : MonoBehaviour {
     int YDIV = 100;
     float PI = Mathf.PI;
     int NUM = XDIV * YDIV;
-    bulletsBuffer = new ComputeBuffer (this.bulletMax, Marshal.SizeOf (typeof (BulletDX)));
+    bulletsBuffer = new ComputeBuffer (bulletMax, Marshal.SizeOf (typeof (BulletDX)));
 
     // 配列に初期値を代入する
-    this.bulletList = new BulletDX[bulletsBuffer.count];
+    bulletList = new BulletDX[bulletsBuffer.count];
 
-    for (int i = 0; i < this.bulletMax; i++) {
-      this.bulletList[i] = new BulletDX (Vector3.zero, Vector3.zero, new Color ());
-      this.bulletList[i].count = 0;
+    for (int i = 0; i < bulletMax; i++) {
+      bulletList[i] = new BulletDX (Vector3.zero, Vector3.zero, new Color ());
+      bulletList[i].count = 0;
     }
 
     // int index = 0;
@@ -210,7 +296,7 @@ public class EnemyDX : MonoBehaviour {
     // }
 
     // バッファに適応
-    bulletsBuffer.SetData (this.bulletList);
+    bulletsBuffer.SetData (bulletList);
   }
 
   /// <summary>

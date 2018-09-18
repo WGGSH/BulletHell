@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+// using UnityEditor;
 using UnityEngine;
 using XLua;
 
@@ -11,14 +14,15 @@ public class Enemy : MonoBehaviour {
   private int currentFuncIndex; // 実行中の弾幕番号
 
   [SerializeField]
-  private List<Bullet> bulletList;
+  static private List<Bullet> bulletList;
+  static private int maxBullet;
   [SerializeField]
-  private int maxBullet;
+  private int MAXBULLET;
 
   // キャッシュデータ
   static public Bullet bullet;
   private Vector3 pos;
-  private int findLastIndex;
+  static private int findLastIndex = 0;
 
   // 弾幕リスト
   private delegate void DanmakuFunc ();
@@ -29,9 +33,12 @@ public class Enemy : MonoBehaviour {
   LuaEnv lua;
   [SerializeField]
   TextAsset luaScript;
+  private string luaText;
+  [SerializeField, Multiline]
+  private string luaHeaderText;
 
-  public List<Bullet> BulletList {
-    get { return this.bulletList; }
+  static public List<Bullet> BulletList {
+    get { return bulletList; }
   }
 
   // public int MaxBullet {
@@ -40,6 +47,8 @@ public class Enemy : MonoBehaviour {
 
   // Use this for initialization
   void Start () {
+    maxBullet = this.MAXBULLET;
+
     // 弾幕の登録
     this.funcTables = new DanmakuFunc[4];
     this.funcTables[0] = this.Func00;
@@ -47,10 +56,11 @@ public class Enemy : MonoBehaviour {
     this.funcTables[2] = this.Func02;
     this.funcTables[3] = this.Func03;
 
-    this.bulletList.Clear ();
-    for (int i = 0; i < this.maxBullet; i++) {
+    bulletList = new List<Bullet> ();
+    bulletList.Clear ();
+    for (int i = 0; i < maxBullet; i++) {
       Enemy.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as Bullet;
-      this.bulletList.Add (Enemy.bullet);
+      bulletList.Add (Enemy.bullet);
     }
 
     this.currentFuncIndex = 3;
@@ -76,6 +86,37 @@ public class Enemy : MonoBehaviour {
     // this.lua.DoString ("require 'Resources/test'");
   }
 
+  public IEnumerator LoadScript () {
+    // Application.dataPathはAssetsの直下のフォルダの事
+    string path = Application.dataPath + "/StreamingAssets/myAssetBundle.unity3d";
+
+    WWW www = new WWW ("file://" + path);
+    yield return www;
+    // var assetBundleCreateRequest = AssetBundle.CreateFromMemory (www.bytes);
+    var assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync (www.bytes);
+    yield return assetBundleCreateRequest;
+    AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
+
+    // Object[] objectArray = assetBundle.LoadAll ();
+    Object[] objectArray = assetBundle.LoadAllAssets ();
+    List<Object> myList = new List<Object> ();
+
+    myList.AddRange (objectArray);
+
+    foreach (Object obj in myList) {
+      Instantiate (obj);
+    };
+
+    // string path = EditorUtility.OpenFilePane ("Overwrite with png", "", "txt");
+    // if (path.Length != 0) {
+    //   // this.luaScript = new TextAsset (path);
+    //   // this.luaScript = Resources.Load (path, typeof (TextAsset)) as TextAsset;
+    //   FileInfo fiA = new FileInfo (path);
+    //   StreamReader srA = new StreamReader (fiA.OpenRead (), Encoding.UTF8);
+    //   this.luaText = srA.ReadToEnd ();
+    // }
+  }
+
   // 実行する弾幕の変更
   public void ChangeFunc (int num) {
     this.currentFuncIndex = num;
@@ -85,28 +126,28 @@ public class Enemy : MonoBehaviour {
   // 弾幕を初期状態に戻す
   public void Restart () {
     frameCount = 0;
-    this.findLastIndex = 0;
-    for (int i = 0; i < this.bulletList.Count; i++) {
-      this.bulletList[i].Diactivate ();
+    findLastIndex = 0;
+    for (int i = 0; i < bulletList.Count; i++) {
+      bulletList[i].Diactivate ();
     }
-    this.bulletList.Clear ();
+    bulletList.Clear ();
   }
 
   // 使用可能な弾を探す
-  private Bullet FindBullet () {
-    int firstIndex = this.findLastIndex;
+  static private Bullet FindBullet () {
+    int firstIndex = findLastIndex;
     int index = firstIndex;
     Bullet targetBullet;
     while (true) {
-      targetBullet = this.bulletList[index++];
+      targetBullet = bulletList[index++];
       if (targetBullet.active == false) {
-        this.findLastIndex = index;
-        if (this.findLastIndex == this.maxBullet) {
-          this.findLastIndex = 0;
+        findLastIndex = index;
+        if (findLastIndex == maxBullet) {
+          findLastIndex = 0;
         }
         return targetBullet;
       }
-      if (index == this.maxBullet) {
+      if (index == maxBullet) {
         index = 0;
       }
       // ループを1周した場合,生成可能な弾のスペースが無いため終了
@@ -123,7 +164,7 @@ public class Enemy : MonoBehaviour {
       // 弾の生成
       for (int x = 0; x < 6; x++) {
         for (int y = 0; y < 3; y++) {
-          Bullet targetBullet = this.FindBullet ();
+          Bullet targetBullet = FindBullet ();
           if (targetBullet == null) continue;
 
           // ----- ここから弾幕の設定 -----
@@ -154,8 +195,8 @@ public class Enemy : MonoBehaviour {
     // 弾の移動処理
     // ここが一番重い
     Bullet target;
-    for (int i = 0; i < this.maxBullet; i++) {
-      target = this.bulletList[i];
+    for (int i = 0; i < maxBullet; i++) {
+      target = bulletList[i];
       if (target.active) {
         target.Move (); // 重い:要改善?
         this.pos = target.TransformCache.position;
@@ -180,18 +221,18 @@ public class Enemy : MonoBehaviour {
           bullet.SetAngle (6.28f / 64 * x, 6.28f / 64 * y);
           bullet.velocity = Quaternion.Euler (angle1, angle2, angle3) * bullet.velocity;
           bullet.SetColor (Color.HSVToRGB (col, 0.5f, 0.6f));
-          this.bulletList.Add (bullet);
+          bulletList.Add (bullet);
         }
       }
     }
 
-    int count = this.bulletList.Count;
+    int count = bulletList.Count;
     for (int i = count - 1; i >= 0; i--) {
-      this.bulletList[i].Move ();
-      this.pos = this.bulletList[i].transform.position;
+      bulletList[i].Move ();
+      this.pos = bulletList[i].transform.position;
       if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
-        Destroy (this.bulletList[i].gameObject);
-        this.bulletList.Remove (this.bulletList[i]);
+        Destroy (bulletList[i].gameObject);
+        bulletList.Remove (bulletList[i]);
       }
     }
 
@@ -208,19 +249,19 @@ public class Enemy : MonoBehaviour {
           bullet.SetSpeed (0.07f - 0.015f * y);
           bullet.accel.Set (0, -0.0003f, 0);
           bullet.SetColor (Color.HSVToRGB (col, 0.5f, 0.6f));
-          this.bulletList.Add (bullet);
+          bulletList.Add (bullet);
         }
       }
     }
 
-    int count = this.bulletList.Count;
+    int count = bulletList.Count;
     for (int i = count - 1; i >= 0; i--) {
-      this.bulletList[i].velocity += this.bulletList[i].accel;
-      this.bulletList[i].Move ();
-      this.pos = this.bulletList[i].transform.position;
+      bulletList[i].velocity += bulletList[i].accel;
+      bulletList[i].Move ();
+      this.pos = bulletList[i].transform.position;
       if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
-        Destroy (this.bulletList[i].gameObject);
-        this.bulletList.Remove (this.bulletList[i]);
+        Destroy (bulletList[i].gameObject);
+        bulletList.Remove (bulletList[i]);
       }
     }
 
@@ -229,13 +270,32 @@ public class Enemy : MonoBehaviour {
   // 弾幕
   public static int XCount, YCount;
   private void Func03 () {
+    this.lua.DoString (this.luaHeaderText + this.luaText);
+    // BulletCreate (0, 0, 0, 0.05f, 0, 0, 0, 0.5f, 0.5f);
+
+    // 弾の移動処理
+    // ここが一番重い
+    Bullet target;
+    for (int i = 0; i < maxBullet; i++) {
+      target = bulletList[i];
+      if (target.active) {
+        target.Move (); // 重い:要改善?
+        this.pos = target.TransformCache.position;
+        if (this.pos.x < -10 || this.pos.x > 10 || this.pos.y < -10 || this.pos.y > 10 || this.pos.z < -10 || this.pos.z > 10) {
+          target.Diactivate ();
+        }
+      }
+    }
+
+    return;
+
     if (frameCount % 3 == 0) {
       // 弾の生成
       for (int x = 0; x < 12; x++) {
         XCount = x;
         for (int y = 0; y < 3; y++) {
           YCount = y;
-          bullet = this.FindBullet ();
+          bullet = FindBullet ();
           if (bullet == null) continue;
 
           // ----- ここから弾幕の設定 -----
@@ -270,9 +330,8 @@ public class Enemy : MonoBehaviour {
 
     // 弾の移動処理
     // ここが一番重い
-    Bullet target;
-    for (int i = 0; i < this.maxBullet; i++) {
-      target = this.bulletList[i];
+    for (int i = 0; i < maxBullet; i++) {
+      target = bulletList[i];
       if (target.active) {
         target.Move (); // 重い:要改善?
         this.pos = target.TransformCache.position;
@@ -281,6 +340,29 @@ public class Enemy : MonoBehaviour {
         }
       }
     }
+
+  }
+
+  static public void BulletCreate (float px, float py, float pz, float speed, float angle1, float angle2, float h, float s, float v) {
+    bullet = FindBullet ();
+    if (bullet == null) {
+      return;
+    }
+    SetSpeed (speed);
+    bullet.TransformCache.position = new Vector3 (px, py, pz);
+    SetAngle1 (angle1);
+    SetAngle2 (angle2);
+    SetColor (h, s, v);
+    bullet.Activate ();
+    // bulletList[index] = new BulletDX (
+    //   new Vector3 (px, py, pz),
+    //   new Vector3 (
+    //     speed * Mathf.Cos (angle1) * Mathf.Cos (angle2),
+    //     speed * Mathf.Sin (angle2),
+    //     speed * Mathf.Sin (angle1) * Mathf.Cos (angle2)
+    //   ),
+    //   Color.HSVToRGB (h, s, v)
+    // );
 
   }
 
@@ -296,7 +378,7 @@ public class Enemy : MonoBehaviour {
     bullet.Angle2 = angle;
   }
 
-  static public void SetColor (float col) {
-    bullet.SetColor (Color.HSVToRGB (col, 0.3f, 0.3f));
+  static public void SetColor (float h, float s, float v) {
+    bullet.SetColor (Color.HSVToRGB (h, s, v));
   }
 }

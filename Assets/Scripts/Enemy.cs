@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 // using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using XLua;
 
 public class Enemy : MonoBehaviour {
@@ -36,6 +37,10 @@ public class Enemy : MonoBehaviour {
   private string luaText;
   [SerializeField, Multiline]
   private string luaHeaderText;
+
+  // ローカルファイルのパス取得用フィールド
+  [SerializeField]
+  private InputField inputField;
 
   static public List<Bullet> BulletList {
     get { return bulletList; }
@@ -86,26 +91,23 @@ public class Enemy : MonoBehaviour {
     // this.lua.DoString ("require 'Resources/test'");
   }
 
-  public IEnumerator LoadScript () {
-    // Application.dataPathはAssetsの直下のフォルダの事
-    string path = Application.dataPath + "/StreamingAssets/myAssetBundle.unity3d";
-
-    WWW www = new WWW ("file://" + path);
+  public IEnumerator LoadScript (string url) {
+    WWW www = new WWW (url);
     yield return www;
-    // var assetBundleCreateRequest = AssetBundle.CreateFromMemory (www.bytes);
-    var assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync (www.bytes);
-    yield return assetBundleCreateRequest;
-    AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
 
-    // Object[] objectArray = assetBundle.LoadAll ();
-    Object[] objectArray = assetBundle.LoadAllAssets ();
-    List<Object> myList = new List<Object> ();
+    // 読み込み終了
+    // Debug.Log (www.text);
 
-    myList.AddRange (objectArray);
-
-    foreach (Object obj in myList) {
-      Instantiate (obj);
-    };
+    // 読み込んだファイルが正しく実行できるかチェックする
+    this.luaText = www.text;
+    try {
+      this.lua.DoString (this.luaHeaderText + this.luaText);
+    } catch (LuaException ex) {
+      // MessageBox.ShowAlertBox (ex.Message, "Lua Script Error");
+      this.luaText = "";
+      Debug.Log ("Lua Script Error");
+    }
+    this.Restart ();
 
     // string path = EditorUtility.OpenFilePane ("Overwrite with png", "", "txt");
     // if (path.Length != 0) {
@@ -115,6 +117,10 @@ public class Enemy : MonoBehaviour {
     //   StreamReader srA = new StreamReader (fiA.OpenRead (), Encoding.UTF8);
     //   this.luaText = srA.ReadToEnd ();
     // }
+  }
+
+  public void FileSelect () {
+    StartCoroutine (LoadScript (this.inputField.text));
   }
 
   // 実行する弾幕の変更
@@ -130,7 +136,6 @@ public class Enemy : MonoBehaviour {
     for (int i = 0; i < bulletList.Count; i++) {
       bulletList[i].Diactivate ();
     }
-    bulletList.Clear ();
   }
 
   // 使用可能な弾を探す

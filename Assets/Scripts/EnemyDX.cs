@@ -4,7 +4,10 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using XLua; //read write filestream
 using System.Text; //Encoding
-using System.Windows.Forms; //OpenFileDialog用に使う
+
+#if UNITY_STANDALONE_WIN // Windows用
+  using System.Windows.Forms; //OpenFileDialog用に使う
+#endif
 
 /// <summary>
 /// 弾の構造体
@@ -32,6 +35,11 @@ struct BulletDX {
   public int count;
 
   /// <summary>
+  /// 角度
+  /// </summary>
+  public float angle;
+
+  /// <summary>
   /// コンストラクタ
   /// </summary>
   public BulletDX (Vector3 pos, Vector3 accel, Color color) {
@@ -39,6 +47,7 @@ struct BulletDX {
     this.accel = accel;
     this.color = color;
     this.count = 1;
+    this.angle = Random.Range (0, 6.28f);
   }
 }
 
@@ -55,7 +64,7 @@ public class EnemyDX : MonoBehaviour {
   /// <summary>
   /// 弾のテクスチャ
   /// </summary>
-  public Texture bulletsTexture;
+  public Texture[] bulletsTextureList;
 
   /// <summary>
   /// 弾の更新を行うコンピュートシェーダー
@@ -110,6 +119,8 @@ public class EnemyDX : MonoBehaviour {
   }
 
   public void LoadScript () {
+    #if UNITY_STANDALONE_WIN
+
     OpenFileDialog open_file_dialog = new OpenFileDialog ();
 
     //InputFieldの初期値を代入しておく(こうするとダイアログがその場所から開く)
@@ -138,11 +149,13 @@ public class EnemyDX : MonoBehaviour {
       try {
         this.lua.DoString (this.luaHeaderText + this.luaText);
       } catch (LuaException ex) {
-        MessageBox.ShowAlertBox (ex.Message, "Lua Script Error");
+        // MessageBox.ShowAlertBox (ex.Message, "Lua Script Error");
+        MessageBox.Show (ex.Message);
         this.luaText = "";
       }
       this.DanmakuInitialize ();
     }
+#endif
   }
 
   /// <summary>
@@ -219,6 +232,7 @@ public class EnemyDX : MonoBehaviour {
       ),
       Color.HSVToRGB (h, s, v)
     );
+    // bulletList[index].angle = angle1;
 
   }
 
@@ -305,7 +319,9 @@ public class EnemyDX : MonoBehaviour {
   void OnRenderObject () {
 
     // テクスチャ、バッファをマテリアルに設定
-    bulletsMaterial.SetTexture ("_MainTex", bulletsTexture);
+    for (int i = 0; i < this.bulletsTextureList.Length; i++) {
+      bulletsMaterial.SetTexture ("_Tex" + i, bulletsTextureList[i]);
+    }
     bulletsMaterial.SetBuffer ("Bullets", bulletsBuffer);
 
     // レンダリングを開始

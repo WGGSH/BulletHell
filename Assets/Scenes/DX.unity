@@ -403,7 +403,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletsShader: {fileID: 4800000, guid: d383bc444ff08ce43b7aa1dbc4289e65, type: 3}
-  bulletsTexture: {fileID: 2800000, guid: 3421f8563b9e0214ab202efaec6b8eaa, type: 3}
+  bulletsTextureList:
+  - {fileID: 2800000, guid: 3421f8563b9e0214ab202efaec6b8eaa, type: 3}
+  - {fileID: 2800000, guid: 4b8e2eecf78b1de41a8699d31357c75d, type: 3}
   bulletsComputeShader: {fileID: 7200000, guid: dbd9384f5e869c94ba63b1ccd58dc59d,
     type: 3}
   BULLETMAX: 12000

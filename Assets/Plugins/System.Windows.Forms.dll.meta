@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 3c0db437506a2cb4eab5fcf672f03284
-timeCreated: 1537278497
+guid: 604819e0f98edbb45b2583a4e27fb4f3
+timeCreated: 1537513645
 licenseType: Free
 PluginImporter:
   externalObjects: {}
@@ -11,16 +11,79 @@ PluginImporter:
   isOverridable: 0
   platformData:
   - first:
+      '': Any
+    second:
+      enabled: 0
+      settings:
+        Exclude Editor: 0
+        Exclude Linux: 0
+        Exclude Linux64: 0
+        Exclude LinuxUniversal: 0
+        Exclude OSXUniversal: 0
+        Exclude WebGL: 1
+        Exclude Win: 0
+        Exclude Win64: 0
+  - first:
       Any: 
     second:
-      enabled: 1
+      enabled: 0
       settings: {}
   - first:
       Editor: Editor
     second:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
+        DefaultValueInitialized: true
+        OS: AnyOS
+  - first:
+      Facebook: Win
+    second:
       enabled: 0
       settings:
-        DefaultValueInitialized: true
+        CPU: AnyCPU
+  - first:
+      Facebook: Win64
+    second:
+      enabled: 0
+      settings:
+        CPU: AnyCPU
+  - first:
+      Standalone: Linux
+    second:
+      enabled: 1
+      settings:
+        CPU: x86
+  - first:
+      Standalone: Linux64
+    second:
+      enabled: 1
+      settings:
+        CPU: x86_64
+  - first:
+      Standalone: LinuxUniversal
+    second:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
+  - first:
+      Standalone: OSXUniversal
+    second:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
+  - first:
+      Standalone: Win
+    second:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
+  - first:
+      Standalone: Win64
+    second:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
   - first:
       Windows Store Apps: WindowsStoreApps
     second:

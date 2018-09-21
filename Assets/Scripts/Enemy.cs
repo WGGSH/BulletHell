@@ -358,21 +358,33 @@ public class Enemy : MonoBehaviour {
     SetAngle1 (angle1);
     SetAngle2 (angle2);
     SetColor (h, s, v);
+    SetState (1);
     bullet.Activate ();
-    // bulletList[index] = new BulletDX (
-    //   new Vector3 (px, py, pz),
-    //   new Vector3 (
-    //     speed * Mathf.Cos (angle1) * Mathf.Cos (angle2),
-    //     speed * Mathf.Sin (angle2),
-    //     speed * Mathf.Sin (angle1) * Mathf.Cos (angle2)
-    //   ),
-    //   Color.HSVToRGB (h, s, v)
-    // );
+  }
 
+  static public void BulletCreate (float px, float py, float pz, float speed, float anglev1, float anglev2, float accel, float anglea1, float anglea2, float h, float s, float v) {
+    bullet = FindBullet ();
+    if (bullet == null) {
+      return;
+    }
+    bullet.TransformCache.position = new Vector3 (px, py, pz);
+    SetSpeed (speed);
+    SetAngle1 (anglev1);
+    SetAngle2 (anglev2);
+    SetAccelSpeed (accel);
+    SetAngleAccel1 (anglea1);
+    SetAngleAccel2 (anglea2);
+    SetColor (h, s, v);
+    SetState (2);
+    bullet.Activate ();
   }
 
   static public void SetSpeed (float speed) {
     bullet.speed = speed;
+  }
+
+  static public void SetAccelSpeed (float speed) {
+    bullet.accelSpeed = speed;
   }
 
   static public void SetAngle1 (float angle) {
@@ -383,7 +395,19 @@ public class Enemy : MonoBehaviour {
     bullet.Angle2 = angle;
   }
 
+  static public void SetAngleAccel1 (float angle) {
+    bullet.angleAccel1 = angle;
+  }
+
+  static public void SetAngleAccel2 (float angle) {
+    bullet.angleAccel2 = angle;
+  }
+
   static public void SetColor (float h, float s, float v) {
     bullet.SetColor (Color.HSVToRGB (h, s, v));
+  }
+
+  static public void SetState (int value) {
+    bullet.state = value;
   }
 }

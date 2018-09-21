@@ -6,47 +6,47 @@ using XLua; //read write filestream
 using System.Text; //Encoding
 
 #if UNITY_STANDALONE_WIN // Windows用
-  using System.Windows.Forms; //OpenFileDialog用に使う
+using System.Windows.Forms; //OpenFileDialog用に使う
 #endif
 
-/// <summary>
-/// 弾の構造体
-/// </summary>
-struct BulletDX {
+// 弾データの構造体
+public struct BulletDX {
 
-  /// <summary>
-  /// 座標
-  /// </summary>
+  // 座標
   public Vector3 pos;
 
-  /// <summary>
-  /// 速度
-  /// </summary>
-  public Vector3 accel;
+  // 速度
+  public Vector3 velocity;
 
-  /// <summary>
-  /// 色
-  /// </summary>
+  // 加速度
+  public Vector3 acceleration;
+
+  // 色
   public Color color;
 
-  /// <summary>
-  /// 使用中フラグ
-  /// </summary>
-  public int count;
+  // 状態保持パラメータ
+  public int state;
 
-  /// <summary>
   /// 角度
-  /// </summary>
   public float angle;
 
-  /// <summary>
-  /// コンストラクタ
-  /// </summary>
-  public BulletDX (Vector3 pos, Vector3 accel, Color color) {
+  // コンストラクタ
+  public BulletDX (Vector3 pos, Vector3 velocity, Color color) {
     this.pos = pos;
-    this.accel = accel;
+    this.velocity = velocity;
+    this.acceleration = Vector3.zero;
     this.color = color;
-    this.count = 1;
+    this.state = 1;
+    this.angle = Random.Range (0, 6.28f);
+  }
+
+  // コンストラクタ
+  public BulletDX (Vector3 pos, Vector3 velocity, Vector3 acceleration, Color color) {
+    this.pos = pos;
+    this.velocity = velocity;
+    this.acceleration = acceleration;
+    this.color = color;
+    this.state = 2; // 加速度使用フラグ
     this.angle = Random.Range (0, 6.28f);
   }
 }
@@ -79,12 +79,12 @@ public class EnemyDX : MonoBehaviour {
   /// <summary>
   /// 弾のコンピュートバッファ
   /// </summary>
-  ComputeBuffer bulletsBuffer;
+  public static ComputeBuffer bulletsBuffer;
 
   static private int bulletMax;
   [SerializeField]
   private int BULLETMAX;
-  static BulletDX[] bulletList;
+  public static BulletDX[] bulletList;
   static private int findLastIndex;
 
   // Lua
@@ -119,7 +119,7 @@ public class EnemyDX : MonoBehaviour {
   }
 
   public void LoadScript () {
-    #if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN
 
     OpenFileDialog open_file_dialog = new OpenFileDialog ();
 
@@ -175,13 +175,17 @@ public class EnemyDX : MonoBehaviour {
     bulletsComputeShader.Dispatch (0, bulletsBuffer.count / 8 + 1, 1, 1);
   }
 
+  public static void BulletUpdate () {
+    bulletsBuffer.SetData (bulletList);
+  }
+
   private void DanmakuInitialize () {
     frameCount = 0;
     bulletsBuffer.GetData (bulletList);
     for (int i = 0; i < bulletMax; i++) {
-      bulletList[i].count = 0;
+      bulletList[i].state = 0;
       bulletList[i].pos = Vector3.zero;
-      bulletList[i].accel = Vector3.zero;
+      bulletList[i].velocity = Vector3.zero;
     }
     bulletsBuffer.SetData (bulletList);
 
@@ -218,6 +222,12 @@ public class EnemyDX : MonoBehaviour {
     this.lua.DoString (this.luaHeaderText + this.luaText);
   }
 
+  static public void SetPosition (int index, Vector3 pos) {
+    bulletList[index].pos = pos;
+  }
+
+  // 弾生成処理
+  // 加速度無し
   static public void BulletCreate (float px, float py, float pz, float speed, float angle1, float angle2, float h, float s, float v) {
     int index = FindBullet ();
     if (index == -1) {
@@ -236,11 +246,34 @@ public class EnemyDX : MonoBehaviour {
 
   }
 
+  // 弾生成処理
+  // 加速度有り
+  static public void BulletCreate (float px, float py, float pz, float speed, float anglev1, float anglev2, float accel, float anglea1, float anglea2, float h, float s, float v) {
+    int index = FindBullet ();
+    if (index == -1) {
+      return;
+    }
+    bulletList[index] = new BulletDX (
+      new Vector3 (px, py, pz),
+      new Vector3 (
+        speed * Mathf.Cos (anglev1) * Mathf.Cos (anglev2),
+        speed * Mathf.Sin (anglev2),
+        speed * Mathf.Sin (anglev1) * Mathf.Cos (anglev2)
+      ),
+      new Vector3 (
+        accel * Mathf.Cos (anglea1) * Mathf.Cos (anglea2),
+        accel * Mathf.Sin (anglea2),
+        accel * Mathf.Sin (anglea1) * Mathf.Cos (anglea2)
+      ),
+      Color.HSVToRGB (h, s, v)
+    );
+  }
+
   // 現在表示されている弾数を取得
   public int GetBulletNum () {
     int count = 0;
     for (int i = 0; i < bulletMax; i++) {
-      if (bulletList[i].count == 1) {
+      if (bulletList[i].state >= 1) {
         count++;
       }
     }
@@ -251,7 +284,7 @@ public class EnemyDX : MonoBehaviour {
     int firstIndex = findLastIndex;
     int index = firstIndex;
     while (true) {
-      if (bulletList[index].count == 0) {
+      if (bulletList[index].state == 0) {
         findLastIndex = index + 1;
         if (findLastIndex == bulletMax) {
           findLastIndex = 0;
@@ -284,7 +317,7 @@ public class EnemyDX : MonoBehaviour {
 
     for (int i = 0; i < bulletMax; i++) {
       bulletList[i] = new BulletDX (Vector3.zero, Vector3.zero, new Color ());
-      bulletList[i].count = 0;
+      bulletList[i].state = 0;
     }
 
     // int index = 0;

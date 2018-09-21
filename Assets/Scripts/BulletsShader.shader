@@ -20,9 +20,10 @@
       // 弾の構造体
       struct BulletDX{
         float3 pos;
-				float3 accel;
+				float3 velocity;
+        float3 acceleration;
 				float4 col;
-        int count;
+        int state;
         float angle;
       };
       // 弾の構造化バッファ
@@ -33,6 +34,7 @@
         float2 tex : TEXCOORD0;
         float4 col : COLOR;
         float angle : ANGLE;
+        int state : STATE;
       };
       // 頂点シェーダ
 			VSOut vert (uint id : SV_VertexID){
@@ -42,12 +44,16 @@
         output.tex = float2(0, 0);
         output.col = Bullets[id].col;
         output.angle = Bullets[id].angle;
+        output.state = Bullets[id].state;
         return output;
 	    }
       // ジオメトリシェーダ
       [maxvertexcount(4)]
       void geom (point VSOut input[1], inout TriangleStream<VSOut> outStream){
         VSOut output;
+        if(input[0].state==0){
+          return;
+        }
         // 全ての頂点で共通の値を計算しておく
         float4 pos = input[0].pos;
         float4 col = input[0].col;
@@ -92,6 +98,9 @@
             output.col = col;
             // 角度
             output.angle = input[0].angle;
+
+            // 状態
+            output.state = input[0].state;
             // ストリームに頂点を追加
             outStream.Append (output);
 			    }

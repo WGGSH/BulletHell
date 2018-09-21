@@ -16,13 +16,15 @@ public class Bullet : MonoBehaviour {
 
   [SerializeField]
   public float speed;
-  public float accelSpeed;
   public float angle1, angle2;
   public Vector3 velocity;
+
+  public float accelSpeed;
+  public float angleAccel1, angleAccel2;
   public Vector3 accel;
   public bool active;
   public Vector3 positionCache;
-
+  public int state;
 
   private Mesh mesh;
 
@@ -40,6 +42,19 @@ public class Bullet : MonoBehaviour {
 
   public float Angle2 {
     set { this.angle2 = value; }
+  }
+
+  public float AngleAccel1 {
+    set { this.angleAccel1 = value; }
+  }
+
+  public float AngleAccel2 {
+    set { this.angleAccel2 = value; }
+  }
+
+  public int State {
+    get { return this.state; }
+    set { this.state = value; }
   }
 
   // Use this for initialization
@@ -104,6 +119,14 @@ public class Bullet : MonoBehaviour {
     );
   }
 
+  public void SetAccel () {
+    this.accel.Set (
+      Mathf.Cos (this.angleAccel1) * Mathf.Cos (this.angleAccel2) * this.accelSpeed,
+      Mathf.Sin (this.angleAccel2) * this.accelSpeed,
+      Mathf.Sin (this.angleAccel1) * Mathf.Cos (this.angleAccel2) * this.accelSpeed
+    );
+  }
+
   public void SetSpeed (float speed) {
     this.velocity.Normalize ();
     this.velocity *= speed;
@@ -118,6 +141,9 @@ public class Bullet : MonoBehaviour {
   }
 
   public void Move () {
+    if (this.state == 2) {
+      this.velocity += this.accel;
+    }
     this.transformCache.position += this.velocity;
   }
 
@@ -129,6 +155,9 @@ public class Bullet : MonoBehaviour {
     this.active = true;
     this.rendererComponent.enabled = true;
     this.SetAngle ();
+    if (this.state == 2) {
+      this.SetAccel ();
+    }
     this.transformCache.LookAt (this.cameraTransformCache.position);
   }
 

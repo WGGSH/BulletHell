@@ -37,3 +37,6 @@ sysinfo.txt
 
 # editor
 .vscode/
+
+# other
+test.lua

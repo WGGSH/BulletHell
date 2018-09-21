@@ -4,9 +4,10 @@
 struct BulletDX
 {
 	float3 pos;
-	float3 accel;
+	float3 velocity;
+  float3 acceleration;
 	float4 col;
-  int count;
+  int state;
   float angle;
 };
 
@@ -24,16 +25,35 @@ RWStructuredBuffer<BulletDX> Bullets;
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	// それぞれの位置情報に移動ベクトルを加算
-  if(Bullets[id.x].count==1){
-    Bullets[id.x].pos += Bullets[id.x].accel ;
-    if(Bullets[id.x].pos.x<-10 || Bullets[id.x].pos.x>10 ||
-    Bullets[id.x].pos.y<-10 || Bullets[id.x].pos.y>10 ||
-    Bullets[id.x].pos.z<-10 || Bullets[id.x].pos.z>10){
-      // フィールド外に出ると,処理を停止
-      Bullets[id.x].count = 0;
-      Bullets[id.x].pos.x=0;
-      Bullets[id.x].pos.y=0;
-      Bullets[id.x].pos.z=0;
-    }
+  switch(Bullets[id.x].state){
+    case 1:
+      // 通常の移動
+      Bullets[id.x].pos += Bullets[id.x].velocity ;
+      if(Bullets[id.x].pos.x<-10 || Bullets[id.x].pos.x>10 ||
+        Bullets[id.x].pos.y<-10 || Bullets[id.x].pos.y>10 ||
+        Bullets[id.x].pos.z<-10 || Bullets[id.x].pos.z>10){
+        // フィールド外に出ると,処理を停止
+        Bullets[id.x].state = 0;
+        Bullets[id.x].pos.x=0;
+        Bullets[id.x].pos.y=0;
+        Bullets[id.x].pos.z=0;
+      }
+    break;
+    case 2:
+      // 加速度ありの移動
+      Bullets[id.x].velocity += Bullets[id.x].acceleration;
+      Bullets[id.x].pos += Bullets[id.x].velocity ;
+      if(Bullets[id.x].pos.x<-10 || Bullets[id.x].pos.x>10 ||
+        Bullets[id.x].pos.y<-10 || Bullets[id.x].pos.y>10 ||
+        Bullets[id.x].pos.z<-10 || Bullets[id.x].pos.z>10){
+        // フィールド外に出ると,処理を停止
+        Bullets[id.x].state = 0;
+        Bullets[id.x].pos.x=0;
+        Bullets[id.x].pos.y=0;
+        Bullets[id.x].pos.z=0;
+      }
+    break;
+    default:
+    break;
   }
 }

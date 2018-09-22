@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIDX : MonoBehaviour {
+public class UIWin : MonoBehaviour {
   [SerializeField]
-  private EnemyDX enemy;
+  private EnemyWin enemy;
   private int count;
   private Text text;
   private float time;

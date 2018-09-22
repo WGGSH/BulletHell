@@ -10,7 +10,7 @@ using System.Windows.Forms; //OpenFileDialog用に使う
 #endif
 
 // 弾データの構造体
-public struct BulletDX {
+public struct BulletWin {
 
   // 座標
   public Vector3 pos;
@@ -31,7 +31,7 @@ public struct BulletDX {
   public float angle;
 
   // コンストラクタ
-  public BulletDX (Vector3 pos, Vector3 velocity, Color color) {
+  public BulletWin (Vector3 pos, Vector3 velocity, Color color) {
     this.pos = pos;
     this.velocity = velocity;
     this.acceleration = Vector3.zero;
@@ -41,7 +41,7 @@ public struct BulletDX {
   }
 
   // コンストラクタ
-  public BulletDX (Vector3 pos, Vector3 velocity, Vector3 acceleration, Color color) {
+  public BulletWin (Vector3 pos, Vector3 velocity, Vector3 acceleration, Color color) {
     this.pos = pos;
     this.velocity = velocity;
     this.acceleration = acceleration;
@@ -54,7 +54,7 @@ public struct BulletDX {
 /// <summary>
 /// 沢山の弾を管理するクラス
 /// </summary>
-public class EnemyDX : MonoBehaviour {
+public class EnemyWin : MonoBehaviour {
 
   /// <summary>
   /// 弾をレンダリングするシェーダー
@@ -84,7 +84,7 @@ public class EnemyDX : MonoBehaviour {
   static private int bulletMax;
   [SerializeField]
   private int BULLETMAX;
-  public static BulletDX[] bulletList;
+  public static BulletWin[] bulletList;
   static private int findLastIndex;
 
   // Lua
@@ -203,7 +203,7 @@ public class EnemyDX : MonoBehaviour {
           // 弾生成処理
           angle1 = Mathf.PI / XDIV * x + frameCount / 100.0f * ((x % 2) * 2 - 1);
           angle2 = Mathf.PI * 2 / YDIV * y + Mathf.PI / 6 * Mathf.Sin (frameCount / 100.0f) + Mathf.PI / YDIV / 2;
-          bulletList[index] = new BulletDX (
+          bulletList[index] = new BulletWin (
             new Vector3 (0, 0, 0),
             new Vector3 (
               speed * Mathf.Cos (angle1) * Mathf.Cos (angle2),
@@ -233,7 +233,7 @@ public class EnemyDX : MonoBehaviour {
     if (index == -1) {
       return;
     }
-    bulletList[index] = new BulletDX (
+    bulletList[index] = new BulletWin (
       new Vector3 (px, py, pz),
       new Vector3 (
         speed * Mathf.Cos (angle1) * Mathf.Cos (angle2),
@@ -253,7 +253,7 @@ public class EnemyDX : MonoBehaviour {
     if (index == -1) {
       return;
     }
-    bulletList[index] = new BulletDX (
+    bulletList[index] = new BulletWin (
       new Vector3 (px, py, pz),
       new Vector3 (
         speed * Mathf.Cos (anglev1) * Mathf.Cos (anglev2),
@@ -310,13 +310,13 @@ public class EnemyDX : MonoBehaviour {
     int YDIV = 100;
     float PI = Mathf.PI;
     int NUM = XDIV * YDIV;
-    bulletsBuffer = new ComputeBuffer (bulletMax, Marshal.SizeOf (typeof (BulletDX)));
+    bulletsBuffer = new ComputeBuffer (bulletMax, Marshal.SizeOf (typeof (BulletWin)));
 
     // 配列に初期値を代入する
-    bulletList = new BulletDX[bulletsBuffer.count];
+    bulletList = new BulletWin[bulletsBuffer.count];
 
     for (int i = 0; i < bulletMax; i++) {
-      bulletList[i] = new BulletDX (Vector3.zero, Vector3.zero, new Color ());
+      bulletList[i] = new BulletWin (Vector3.zero, Vector3.zero, new Color ());
       bulletList[i].state = 0;
     }
 
@@ -327,7 +327,7 @@ public class EnemyDX : MonoBehaviour {
     //   for (int x = 0; x < XDIV; x++) {
     //     angle1 = PI * 2 / XDIV * x + PI * 5 / YDIV * y;
     //     angle2 = PI / YDIV * y - PI / 2;
-    //     this.bulletList[index] = new BulletDX (new Vector3 (0, 0, 0),
+    //     this.bulletList[index] = new BulletWin (new Vector3 (0, 0, 0),
     //       new Vector3 (
     //         speed * Mathf.Cos (angle1) * Mathf.Cos (angle2),
     //         speed * Mathf.Sin (angle2),

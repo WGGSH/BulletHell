@@ -25,6 +25,7 @@
 				float4 col;
         int state;
         float angle;
+        float scale;
       };
       // 弾の構造化バッファ
       StructuredBuffer<BulletDX> Bullets;
@@ -35,6 +36,7 @@
         float4 col : COLOR;
         float angle : ANGLE;
         int state : STATE;
+        float scale : SCALE;
       };
       // 頂点シェーダ
 			VSOut vert (uint id : SV_VertexID){
@@ -45,6 +47,7 @@
         output.col = Bullets[id].col;
         output.angle = Bullets[id].angle;
         output.state = Bullets[id].state;
+        output.scale = Bullets[id].scale;
         return output;
 	    }
       // ジオメトリシェーダ
@@ -57,6 +60,7 @@
         // 全ての頂点で共通の値を計算しておく
         float4 pos = input[0].pos;
         float4 col = input[0].col;
+        float scale= input[0].scale;
         // 四角形になるように頂点を生産
         for(int x = 0; x < 2; x++){
           for(int y = 0; y < 2; y++){
@@ -88,7 +92,7 @@
             //   (x*2-1)*cos(input[0].angle)-(y*2-1)*sin(input[0].angle),
             //   (x*2-1)*sin(input[0].angle)+(y*2-1)*cos(input[0].angle)
             // )*0.2;
-            float2 rotPos = float2(x*2-1,y*2-1)*0.2;
+            float2 rotPos = float2(x*2-1,y*2-1)*0.2*scale;
 
             // 頂点位置を計算
             output.pos = pos+ mul(float4(rotPos,0,1), billboardMatrix);
@@ -101,6 +105,10 @@
 
             // 状態
             output.state = input[0].state;
+
+            // 角度
+            output.scale = scale;
+
             // ストリームに頂点を追加
             outStream.Append (output);
 			    }

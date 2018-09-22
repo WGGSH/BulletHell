@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIDX : MonoBehaviour {
+public class UIWin : MonoBehaviour {
   [SerializeField]
-  private EnemyDX enemy;
+  private EnemyWin enemy;
   private int count;
   private Text text;
   private float time;
@@ -20,16 +20,10 @@ public class UIDX : MonoBehaviour {
   void Update () {
     this.count++;
     this.time += Time.deltaTime;
+    // 60フレームに1回UIを更新する
     if (this.count % 60 == 0) {
       float fps = 1.0f / this.time * 60;
       this.time = 0;
-      int num = 0;
-      // int max = this.enemy.BulletList.Count;
-      // for (int i = 0; i < max; i++) {
-      //   if (this.enemy.BulletList[i].active == true) {
-      //     num++;
-      //   }
-      // }
       this.text.text =
         "FPS: " + fps + "\n" +
         "Bullet: " + this.enemy.GetBulletNum();

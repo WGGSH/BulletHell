@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraRotateDX : MonoBehaviour {
+public class CameraRotateWin : MonoBehaviour {
   [SerializeField]
   private float rotateSpeed;
-  // [SerializeField]
-  // private Enemy enemy;
   private float angle1;
   private float angle2;
 
@@ -20,13 +18,13 @@ public class CameraRotateDX : MonoBehaviour {
 
   // Update is called once per frame
   void Update () {
-    // this.angle1 += Input.GetAxis ("Vertical") * this.rotateSpeed;
-    // this.angle2 += Input.GetAxis ("Horizontal") * this.rotateSpeed;
 
+    // マウスクリック時に座標を記録する
     if (Input.GetMouseButtonDown (0)) {
       this.screenPoint = Input.mousePosition;
     }
     if (Input.GetMouseButton (0)) {
+      // マウスをドラッグすると，カメラを回転する
       Vector3 currentScreenPoint = Input.mousePosition;
 
       this.angle1 += (currentScreenPoint.y - this.screenPoint.y) * this.rotateSpeed;
@@ -41,17 +39,6 @@ public class CameraRotateDX : MonoBehaviour {
         this.angle1 = -180;
       }
       this.transform.rotation = Quaternion.Euler (this.angle1, this.angle2, 0);
-
-      // 全ての弾の向きをカメラに合わせる
-      // int count = this.enemy.BulletList.Count;
-      // for (int i = 0; i < count; i++) {
-      //   Bullet targetBullet = this.enemy.BulletList[i];
-      //   if (targetBullet.active == false) {
-      //     continue;
-      //   }
-      //   targetBullet.TransformCache.LookAt (targetBullet.CameraTransformCache.position);
-      // }
-
     }
 
   }

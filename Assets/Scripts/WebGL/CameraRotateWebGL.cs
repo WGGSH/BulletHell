@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraRotate : MonoBehaviour {
+public class CameraRotateWebGL : MonoBehaviour {
   [SerializeField]
   private float rotateSpeed;
   [SerializeField]
-  private Enemy enemy;
+  private EnemyWebGL enemy;
   private float angle1;
   private float angle2;
 
@@ -43,9 +43,9 @@ public class CameraRotate : MonoBehaviour {
       this.transform.rotation = Quaternion.Euler (this.angle1, this.angle2, 0);
 
       // 全ての弾の向きをカメラに合わせる
-      int count = Enemy.BulletList.Count;
+      int count = EnemyWebGL.BulletList.Count;
       for (int i = 0; i < count; i++) {
-        Bullet targetBullet = Enemy.BulletList[i];
+        BulletWebGL targetBullet = EnemyWebGL.BulletList[i];
         if (targetBullet.active == false) {
           continue;
         }

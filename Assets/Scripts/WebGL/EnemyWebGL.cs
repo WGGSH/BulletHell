@@ -7,21 +7,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using XLua;
 
-public class Enemy : MonoBehaviour {
+public class EnemyWebGL : MonoBehaviour {
   [SerializeField]
-  private Bullet[] bulletPrefab; // 使用する弾のPrefab
+  private BulletWebGL[] bulletPrefab; // 使用する弾のPrefab
 
   static public int frameCount; // フレーム数
   private int currentFuncIndex; // 実行中の弾幕番号
 
   [SerializeField]
-  static private List<Bullet> bulletList;
+  static private List<BulletWebGL> bulletList;
   static private int maxBullet;
   [SerializeField]
   private int MAXBULLET;
 
   // キャッシュデータ
-  static public Bullet bullet;
+  static public BulletWebGL bullet;
   private Vector3 pos;
   static private int findLastIndex = 0;
 
@@ -42,7 +42,7 @@ public class Enemy : MonoBehaviour {
   [SerializeField]
   private InputField inputField;
 
-  static public List<Bullet> BulletList {
+  static public List<BulletWebGL> BulletList {
     get { return bulletList; }
   }
 
@@ -61,11 +61,11 @@ public class Enemy : MonoBehaviour {
     this.funcTables[2] = this.Func02;
     this.funcTables[3] = this.Func03;
 
-    bulletList = new List<Bullet> ();
+    bulletList = new List<BulletWebGL> ();
     bulletList.Clear ();
     for (int i = 0; i < maxBullet; i++) {
-      Enemy.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as Bullet;
-      bulletList.Add (Enemy.bullet);
+      EnemyWebGL.bullet = Instantiate (this.bulletPrefab[0], this.transform.position, Quaternion.identity) as BulletWebGL;
+      bulletList.Add (EnemyWebGL.bullet);
     }
 
     this.currentFuncIndex = 3;
@@ -139,10 +139,10 @@ public class Enemy : MonoBehaviour {
   }
 
   // 使用可能な弾を探す
-  static private Bullet FindBullet () {
+  static private BulletWebGL FindBullet () {
     int firstIndex = findLastIndex;
     int index = firstIndex;
-    Bullet targetBullet;
+    BulletWebGL targetBullet;
     while (true) {
       targetBullet = bulletList[index++];
       if (targetBullet.active == false) {
@@ -169,7 +169,7 @@ public class Enemy : MonoBehaviour {
       // 弾の生成
       for (int x = 0; x < 6; x++) {
         for (int y = 0; y < 3; y++) {
-          Bullet targetBullet = FindBullet ();
+          BulletWebGL targetBullet = FindBullet ();
           if (targetBullet == null) continue;
 
           // ----- ここから弾幕の設定 -----
@@ -199,7 +199,7 @@ public class Enemy : MonoBehaviour {
 
     // 弾の移動処理
     // ここが一番重い
-    Bullet target;
+    BulletWebGL target;
     for (int i = 0; i < maxBullet; i++) {
       target = bulletList[i];
       if (target.active) {
@@ -280,7 +280,7 @@ public class Enemy : MonoBehaviour {
 
     // 弾の移動処理
     // ここが一番重い
-    Bullet target;
+    BulletWebGL target;
     for (int i = 0; i < maxBullet; i++) {
       target = bulletList[i];
       if (target.active) {
@@ -348,7 +348,7 @@ public class Enemy : MonoBehaviour {
 
   }
 
-  static public void BulletCreate (float px, float py, float pz, float speed, float angle1, float angle2, float h, float s, float v) {
+  static public void BulletCreate (float px, float py, float pz, float speed, float angle1, float angle2, float h, float s, float v, float scale = 1) {
     bullet = FindBullet ();
     if (bullet == null) {
       return;
@@ -359,10 +359,11 @@ public class Enemy : MonoBehaviour {
     SetAngle2 (angle2);
     SetColor (h, s, v);
     SetState (1);
+    SetScale (scale);
     bullet.Activate ();
   }
 
-  static public void BulletCreate (float px, float py, float pz, float speed, float anglev1, float anglev2, float accel, float anglea1, float anglea2, float h, float s, float v) {
+  static public void BulletCreate (float px, float py, float pz, float speed, float anglev1, float anglev2, float accel, float anglea1, float anglea2, float h, float s, float v, float scale = 1) {
     bullet = FindBullet ();
     if (bullet == null) {
       return;
@@ -376,6 +377,7 @@ public class Enemy : MonoBehaviour {
     SetAngleAccel2 (anglea2);
     SetColor (h, s, v);
     SetState (2);
+    SetScale (scale);
     bullet.Activate ();
   }
 
@@ -409,5 +411,10 @@ public class Enemy : MonoBehaviour {
 
   static public void SetState (int value) {
     bullet.state = value;
+  }
+
+  static public void SetScale (float scale) {
+    bullet.scale = scale;
+    bullet.gameObject.transform.localScale = new Vector3 (scale, scale, scale);
   }
 }

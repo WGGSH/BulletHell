@@ -17,6 +17,7 @@ public struct BulletWin {
   public Color color; // 色
   public int state; // 状態保持パラメータ
   public float angle; // 角度
+  public float scale; // 大きさ
 
   // コンストラクタ
   public BulletWin (Vector3 pos, Vector3 velocity, Color color) {
@@ -25,7 +26,8 @@ public struct BulletWin {
     this.acceleration = Vector3.zero;
     this.color = color;
     this.state = 1;
-    this.angle = Random.Range (0, 6.28f);
+    this.angle = 0;
+    this.scale = 1;
   }
 
   // コンストラクタ 2
@@ -36,7 +38,8 @@ public struct BulletWin {
     this.acceleration = acceleration;
     this.color = color;
     this.state = 2; // 加速度使用フラグ
-    this.angle = Random.Range (0, 6.28f);
+    this.angle = 0;
+    this.scale = 3;
   }
 }
 
@@ -129,7 +132,7 @@ public class EnemyWin : MonoBehaviour {
     // 弾幕の実行
     this.BulletsUpdate ();
 
-    // たま情報をコンピュートシェーダに送る
+    // 弾情報をコンピュートシェーダに送る
     bulletsBuffer.SetData (bulletList);
     bulletsComputeShader.SetBuffer (0, "Bullets", bulletsBuffer);
     bulletsComputeShader.Dispatch (0, bulletsBuffer.count / 8 + 1, 1, 1);
@@ -191,7 +194,7 @@ public class EnemyWin : MonoBehaviour {
 
   // 弾生成処理
   // 加速度無し
-  static public void BulletCreate (float px, float py, float pz, float speed, float angle1, float angle2, float h, float s, float v) {
+  static public void BulletCreate (float px, float py, float pz, float speed, float angle1, float angle2, float h, float s, float v, float scale = 1) {
     int index = FindUnusedBullet ();
     if (index == -1) {
       return;
@@ -205,11 +208,12 @@ public class EnemyWin : MonoBehaviour {
       ),
       Color.HSVToRGB (h, s, v)
     );
+    bulletList[index].scale = scale;
   }
 
   // 弾生成処理
   // 加速度有り
-  static public void BulletCreate (float px, float py, float pz, float speed, float anglev1, float anglev2, float accel, float anglea1, float anglea2, float h, float s, float v) {
+  static public void BulletCreate (float px, float py, float pz, float speed, float anglev1, float anglev2, float accel, float anglea1, float anglea2, float h, float s, float v, float scale = 1) {
     int index = FindUnusedBullet ();
     if (index == -1) {
       return;
@@ -228,6 +232,7 @@ public class EnemyWin : MonoBehaviour {
       ),
       Color.HSVToRGB (h, s, v)
     );
+    bulletList[index].scale = scale;
   }
 
   // 現在表示されている弾数を取得

@@ -9,6 +9,7 @@ struct BulletDX
 	float4 col;
   int state;
   float angle;
+  float scale;
 };
 
 // 前回の更新からの経過時間

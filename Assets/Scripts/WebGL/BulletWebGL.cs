@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour {
+public class BulletWebGL : MonoBehaviour {
   [SerializeField]
   private GameObject plane;
   [SerializeField]
@@ -25,6 +25,8 @@ public class Bullet : MonoBehaviour {
   public bool active;
   public Vector3 positionCache;
   public int state;
+  public float scale;
+  public float preScale;
 
   private Mesh mesh;
 
@@ -55,6 +57,11 @@ public class Bullet : MonoBehaviour {
   public int State {
     get { return this.state; }
     set { this.state = value; }
+  }
+
+  public float Scale {
+    get { return this.scale; }
+    set { this.scale = value; }
   }
 
   // Use this for initialization

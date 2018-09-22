@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UI : MonoBehaviour {
   [SerializeField]
-  private Enemy enemy;
+  private EnemyWebGL enemy;
   private int count;
   private Text text;
   private float time;
@@ -24,9 +24,9 @@ public class UI : MonoBehaviour {
       float fps = 1.0f / this.time * 60;
       this.time = 0;
       int num = 0;
-      int max = Enemy.BulletList.Count;
+      int max = EnemyWebGL.BulletList.Count;
       for (int i = 0; i < max; i++) {
-        if (Enemy.BulletList[i].active == true) {
+        if (EnemyWebGL.BulletList[i].active == true) {
           num++;
         }
       }

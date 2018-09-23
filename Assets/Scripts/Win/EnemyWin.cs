@@ -18,6 +18,7 @@ public struct BulletWin {
   public int state; // 状態保持パラメータ
   public float angle; // 角度
   public float scale; // 大きさ
+  public int time; // 経過時間
 
   // コンストラクタ
   public BulletWin (Vector3 pos, Vector3 velocity, Color color) {
@@ -28,6 +29,7 @@ public struct BulletWin {
     this.state = 1;
     this.angle = 0;
     this.scale = 1;
+    this.time = 0;
   }
 
   // コンストラクタ 2
@@ -39,7 +41,8 @@ public struct BulletWin {
     this.color = color;
     this.state = 2; // 加速度使用フラグ
     this.angle = 0;
-    this.scale = 3;
+    this.scale = 1;
+    this.time = 0;
   }
 }
 

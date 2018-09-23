@@ -26,6 +26,7 @@
         int state;
         float angle;
         float scale;
+        int time;
       };
       // 弾の構造化バッファ
       StructuredBuffer<BulletDX> Bullets;

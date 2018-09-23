@@ -649,11 +649,11 @@ Prefab:
     - target: {fileID: 114981828723547150, guid: 135d38e3af2262f4993cd2b402d78efc,
         type: 2}
       propertyPath: luaHeaderText
-      value: 'local enemy = CS.Enemy
+      value: 'local enemy = CS.EnemyWebGL
 
         local PI = 3.1415
 
-        local time = CS.Enemy.frameCount
+        local time = CS.EnemyWebGL.frameCount
 
 '
       objectReference: {fileID: 0}

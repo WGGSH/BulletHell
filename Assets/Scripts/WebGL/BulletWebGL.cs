@@ -27,6 +27,7 @@ public class BulletWebGL : MonoBehaviour {
   public int state;
   public float scale;
   public float preScale;
+  public int time;
 
   private Mesh mesh;
 
@@ -148,6 +149,7 @@ public class BulletWebGL : MonoBehaviour {
   }
 
   public void Move () {
+    this.time++;
     if (this.state == 2) {
       this.velocity += this.accel;
     }

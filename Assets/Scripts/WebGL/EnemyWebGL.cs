@@ -360,6 +360,7 @@ public class EnemyWebGL : MonoBehaviour {
     SetColor (h, s, v);
     SetState (1);
     SetScale (scale);
+    SetTime (0);
     bullet.Activate ();
   }
 
@@ -378,6 +379,7 @@ public class EnemyWebGL : MonoBehaviour {
     SetColor (h, s, v);
     SetState (2);
     SetScale (scale);
+    SetTime (0);
     bullet.Activate ();
   }
 
@@ -416,5 +418,9 @@ public class EnemyWebGL : MonoBehaviour {
   static public void SetScale (float scale) {
     bullet.scale = scale;
     bullet.gameObject.transform.localScale = new Vector3 (scale, scale, scale);
+  }
+
+  static public void SetTime (int time) {
+    bullet.time = time;
   }
 }

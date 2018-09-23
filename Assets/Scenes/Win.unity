@@ -409,14 +409,18 @@ MonoBehaviour:
   bulletsComputeShader: {fileID: 7200000, guid: dbd9384f5e869c94ba63b1ccd58dc59d,
     type: 3}
   BULLETMAX: 12000
-  luaScript: {fileID: 4900000, guid: 3f838d9681459ce4aaf930fc49e25054, type: 3}
+  luaText: 
   luaHeaderText: 'local enemy = CS.EnemyWin
 
     local PI = 3.1415
 
     local time = CS.EnemyWin.frameCount
 
-'
+    local Vector3 = CS.UnityEngine.Vector3
+
+    local cache = CS.EnemyWin.cacheBulletIndex
+
+    local cacheSize = cache.Count -1'
 --- !u!4 &1112258037
 Transform:
   m_ObjectHideFlags: 0

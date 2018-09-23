@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using XLua; //read write filestream
 using System.Text; //Encoding
+using System.Collections.Generic;
 
 #if UNITY_STANDALONE_WIN // Windows用
 using System.Windows.Forms; //OpenFileDialog用に使う
@@ -44,6 +45,42 @@ public struct BulletWin {
     this.scale = 1;
     this.time = 0;
   }
+
+  public void SetPosition (float px, float py, float pz) {
+    this.pos.Set (px, py, pz);
+  }
+
+  public Vector3 GetPosition () {
+    return this.pos;
+  }
+
+  public Vector3 GetVelocity () {
+    return this.velocity;
+  }
+
+  public void SetVelocity (float vx, float vy, float vz) {
+    this.velocity.Set (vx, vy, vz);
+  }
+
+  public Vector3 GetAcceleration () {
+    return this.acceleration;
+  }
+
+  public void SetAcceleration (float ax, float ay, float az) {
+    this.acceleration.Set (ax, ay, az);
+  }
+
+  public float GetScale () {
+    return this.scale;
+  }
+
+  public void SetScale (float scale) {
+    this.scale = scale;
+  }
+
+  public int GetTime () {
+    return this.time;
+  }
 }
 
 // 敵クラス
@@ -66,6 +103,7 @@ public class EnemyWin : MonoBehaviour {
   [SerializeField]
   private int BULLETMAX; // 弾の最大数(UnityEditorからの設定用)
   public static BulletWin[] bulletList; // 弾リスト
+  public static List<int> cacheBulletIndex; // キャッシュしている弾のインデックス
   static private int findLastIndex; // 弾検索用インデックス
 
   // Lua
@@ -92,6 +130,8 @@ public class EnemyWin : MonoBehaviour {
 
     // Luaのインスタンス作成
     this.lua = new LuaEnv ();
+
+    EnemyWin.cacheBulletIndex = new List<int> ();
   }
 
   // スクリプトの読み込み
@@ -156,6 +196,7 @@ public class EnemyWin : MonoBehaviour {
       bulletList[i].velocity = Vector3.zero;
     }
     bulletsBuffer.SetData (bulletList);
+    cacheBulletIndex.Clear ();
   }
 
   private void Func00 () {
@@ -189,10 +230,53 @@ public class EnemyWin : MonoBehaviour {
   // Luaスクリプトを実行する
   private void BulletsUpdate () {
     this.lua.DoString (this.luaHeaderText + this.luaText);
+
+    if (frameCount == 61) {
+      for (int i = 0; i < 6; i++) {
+        // bulletList[i].SetPosition (0, 0, 0);
+      }
+    }
   }
 
+  // 弾の座標設定
   static public void SetPosition (int index, Vector3 pos) {
-    bulletList[index].pos = pos;
+    EnemyWin.bulletList[index].pos = pos;
+  }
+
+  // 弾の速度設定
+  static public void SetVelocity (int index, Vector3 velocity) {
+    EnemyWin.bulletList[index].velocity = velocity;
+  }
+
+  // 弾の加速度設定
+  static public void SetAcceleration (int index, Vector3 accel) {
+    EnemyWin.bulletList[index].acceleration = accel;
+    if (accel.x == 0 && accel.y == 0 && accel.z == 0) {
+      EnemyWin.bulletList[index].state = 1;
+    } else {
+      EnemyWin.bulletList[index].state = 2;
+    }
+  }
+
+  // 弾の大きさ設定
+  static public void SetScale (int index, float scale) {
+    EnemyWin.bulletList[index].scale = scale;
+  }
+
+  // キャッシュ追加
+  static public void AddCache () {
+    int index = EnemyWin.findLastIndex;
+    if (index == 0) {
+      index = EnemyWin.bulletMax - 1;
+    } else {
+      index--;
+    }
+    EnemyWin.cacheBulletIndex.Add (index);
+  }
+
+  // キャッシュの弾を取得
+  static public BulletWin GetCache (int index) {
+    return EnemyWin.bulletList[index];
   }
 
   // 弾生成処理
@@ -264,6 +348,7 @@ public class EnemyWin : MonoBehaviour {
         }
         return index;
       }
+      index++;
       if (index == EnemyWin.bulletMax) {
         index = 0;
       }
@@ -304,6 +389,10 @@ public class EnemyWin : MonoBehaviour {
 
     // 弾のオブジェクトを描画
     Graphics.DrawProcedural (MeshTopology.Points, bulletsBuffer.count);
+  }
+
+  BulletWin GetCacheBullet () {
+    return EnemyWin.bulletList[0];
   }
 
 }

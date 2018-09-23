@@ -10,6 +10,7 @@ struct BulletDX
   int state;
   float angle;
   float scale;
+  int time;
 };
 
 // 前回の更新からの経過時間
@@ -29,6 +30,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
   switch(Bullets[id.x].state){
     case 1:
       // 通常の移動
+      Bullets[id.x].time++;
       Bullets[id.x].pos += Bullets[id.x].velocity ;
       if(Bullets[id.x].pos.x<-10 || Bullets[id.x].pos.x>10 ||
         Bullets[id.x].pos.y<-10 || Bullets[id.x].pos.y>10 ||
@@ -42,6 +44,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     break;
     case 2:
       // 加速度ありの移動
+      Bullets[id.x].time++;
       Bullets[id.x].velocity += Bullets[id.x].acceleration;
       Bullets[id.x].pos += Bullets[id.x].velocity ;
       if(Bullets[id.x].pos.x<-10 || Bullets[id.x].pos.x>10 ||

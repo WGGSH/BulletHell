@@ -23,6 +23,8 @@ public class EnemyWebGL : MonoBehaviour {
   // キャッシュデータ
   static public BulletWebGL bullet;
   private Vector3 pos;
+
+  public static List<int> cacheBulletIndex;
   static private int findLastIndex = 0;
 
   // 弾幕リスト
@@ -76,6 +78,8 @@ public class EnemyWebGL : MonoBehaviour {
 
     this.luaScript = new TextAsset ();
     this.luaScript = Resources.Load ("test.lua", typeof (TextAsset)) as TextAsset;
+
+    EnemyWebGL.cacheBulletIndex = new List<int> ();
   }
 
   // Update is called once per frame
@@ -422,5 +426,19 @@ public class EnemyWebGL : MonoBehaviour {
 
   static public void SetTime (int time) {
     bullet.time = time;
+  }
+
+  static public void AddCache () {
+    int index = EnemyWebGL.findLastIndex;
+    if (index == 0) {
+      index = EnemyWebGL.maxBullet - 1;
+    } else {
+      index--;
+    }
+    EnemyWebGL.cacheBulletIndex.Add (index);
+  }
+
+  static public BulletWebGL GetCache (int index) {
+    return EnemyWebGL.bulletList[EnemyWebGL.cacheBulletIndex[index]];
   }
 }

@@ -92,7 +92,7 @@ public class EnemyWebGL : MonoBehaviour {
   }
 
   public IEnumerator LoadScript (string url) {
-    WWW www = new WWW (url);
+    WWW www = new WWW ("http://bullethellscript.herokuapp.com/uploaded/" + url);
     yield return www;
 
     // 読み込み終了
